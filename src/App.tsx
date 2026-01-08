@@ -1,14 +1,20 @@
-import React from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import LogInPage from './pages/login/LogInPage'
 import Dashboard from './pages/dashboard/Dashboard'
+import Test from './pages/test/Test'
+import Layout from './layout/Layout'
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<LogInPage />}>
-          <Route index element={<Dashboard />} />
+        {/* Public route */}
+        <Route path="/" element={<LogInPage />} />
+
+        {/* Protected / App layout */}
+        <Route element={<Layout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/test" element={<Test />} />
         </Route>
       </Routes>
     </BrowserRouter>
