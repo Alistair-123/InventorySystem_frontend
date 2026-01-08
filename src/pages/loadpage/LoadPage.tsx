@@ -20,17 +20,25 @@ function LoadPage() {
         textAlign: "center",
       }}
     >
-      <h1 style={{ fontSize: titleSize,
-        color: "#000000ff",
-       }}>
+      <h1 style={{ fontSize: titleSize, fontWeight: 600, color: "#000000ff" }}>
         DICT R7 – TAGBILARAN BOHOL
       </h1>
 
-      <h2 style={{ fontSize: systemSize }}>
-        <span style={{ color: "#2563eb" }}>INVENTORY</span>{" "}
-        <br></br>
-        <span style={{ color: "#dc2626" }}>SYSTEM</span>
-      </h2>
+      <h2
+  style={{
+    fontSize: systemSize,
+    fontWeight: 800,
+    marginTop: "1rem",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    // gap: "0rem",
+  }}
+>
+  <span style={{ color: "#2563eb" }}>INVENTORY</span>
+  <span style={{ color: "#dc2626" }}>SYSTEM</span>
+</h2>
+
     </div>
   );
 }
