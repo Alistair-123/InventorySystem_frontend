@@ -16,4 +16,8 @@
 }
 
 
-@theme 
+@theme  {
+    --font-poppins: Poppins;
+    --font-med: Poppins-Medium;
+    --font-extrabolditalic: Poppins-ExtraBoldItalic;
+}
