@@ -1,11 +1,11 @@
 import React from 'react'
 
-function LogInPage() {
+function Test() {
   return (
     <div>
-      qwewew
+      
     </div>
   )
 }
 
-export default LogInPage
+export default Test
