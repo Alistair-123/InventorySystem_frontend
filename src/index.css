@@ -6,14 +6,18 @@
 }
 
 @font-face {
-    font-family: Poppins;
+    font-family: Poppins-Medium;
     src: url(../src/assets/fonts/Poppins-Medium.ttf);
 }
 
 @font-face {
-    font-family: Poppins;
+    font-family: Poppins-ExtraBoldItalic;
     src: url(../src/assets/fonts/Poppins-ExtraBoldItalic.ttf);
 }
 
 
-@theme 
+@theme  {
+    --font-poppins: Poppins;
+    --font-med: Poppins-Medium;
+    --font-extrabolditalic: Poppins-ExtraBoldItalic;
+}
