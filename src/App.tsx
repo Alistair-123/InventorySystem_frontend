@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import LoadPage from './pages/loadpage/LoadPage'
 import LogInPage from './pages/login/LogInPage'
 import Dashboard from './pages/dashboard/Dashboard'
 import Test from './pages/test/Test'
@@ -9,7 +10,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* Public route */}
-        <Route path="/" element={<LogInPage />} />
+        <Route path="/" element={<LoadPage />} />
+        <Route path="/login" element={<LogInPage />} />
 
         {/* Protected / App layout */}
         <Route element={<Layout />}>
