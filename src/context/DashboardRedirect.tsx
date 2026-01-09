@@ -1,17 +1,23 @@
-import { Navigate } from "react-router-dom";
-import { useContext } from "react";
-import { AuthContext } from "./authContext";
+import { Navigate } from 'react-router-dom';
+import type { ReactNode } from 'react';
+import { useAuth } from './UseAuth';
 
 interface DashboardRedirectProps {
-    children: React.ReactNode;
-    user?: string;
-    loading?: boolean;
+  children: ReactNode;
 }
-export default function DashboardRedirect({ children }: DashboardRedirectProps) {
-    const { user, loading } = useContext(AuthContext);
-    return (
-        <>
-            {loading ? null : user ? children : <Navigate to="/login" replace />}
-        </>
-    );
+
+export default function DashboardRedirect({
+  children,
+}: DashboardRedirectProps) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return null;
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
 }
