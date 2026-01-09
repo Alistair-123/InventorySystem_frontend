@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import Top from '../../assets/Top.png'
+import logo from '../../assets/logos.png'
 function LoadPage() {
   const navigate = useNavigate();
   const [isAnimating, setIsAnimating] = useState(false);
@@ -121,6 +122,7 @@ function LoadPage() {
               fontWeight: 600,
               animation: "fadeOut 0.4s ease forwards",
             }}
+            className="text-black"
           >
             Continue
           </span>
@@ -138,6 +140,7 @@ function LoadPage() {
         )}
       </button>
     </div>
+    
   );
 }
 

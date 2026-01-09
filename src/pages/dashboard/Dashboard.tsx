@@ -3,7 +3,8 @@ import React from 'react'
 function Dashboard() {
   return (
     <div>
-      qwe
+      <h1>Dashboard</h1>
+      <p>Welcome to the dashboard page!</p>
     </div>
   )
 }
