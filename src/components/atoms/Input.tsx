@@ -1,20 +1,15 @@
-  import React from 'react';
+import React, { forwardRef } from 'react';
 
-  type InputVariant = 'default' | 'auth' | 'search';
+type InputVariant = 'default' | 'auth' | 'search';
 
-  interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-    label?: string;
-    error?: string;
-    variant?: InputVariant;
-  }
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
+  error?: string;
+  variant?: InputVariant;
+}
 
-  export const Input = ({
-    label,
-    error,
-    variant = 'default',
-    className = '',
-    ...props
-  }: InputProps) => {
+export const Input = forwardRef<HTMLInputElement, InputProps>(
+  ({ label, error, variant = 'default', className = '', ...props }, ref) => {
     const base =
       'w-full rounded px-3 py-2 text-sm border focus:outline-none focus:ring-2';
 
@@ -33,6 +28,7 @@
         )}
 
         <input
+          ref={ref}
           className={`${base} ${variants[variant]} ${error ? 'border-red-500' : ''} ${className}`}
           {...props}
         />
@@ -44,4 +40,7 @@
         )}
       </div>
     );
-  };
+  }
+);
+
+Input.displayName = 'Input';
