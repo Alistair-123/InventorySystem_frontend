@@ -1,9 +1,9 @@
-import axios from "axios";
+import axios, { AxiosInstance } from "axios";
 
 // Base URL is read from Vite env variable VITE_API_URL, fallback to localhost
 const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-const axiosInstance = axios.create({
+export const axiosInstance: AxiosInstance = axios.create({
   baseURL,
   timeout: 5000,
   withCredentials: true,
@@ -35,4 +35,5 @@ axiosInstance.interceptors.response.use(
 //   return axiosInstance.post('/auth/logout');
 // }
 
-// export default axiosInstance;
+// also export default for compatibility
+export default axiosInstance;
