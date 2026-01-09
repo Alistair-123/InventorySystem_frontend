@@ -16,7 +16,7 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
     const { label, name, error, variant = 'default', placeholder, type = 'text', ...rest } = props;
 
     return (
-      <div className="flex flex-col gap-3">
+     
         <Input
           label={label}
           name={name}
@@ -27,7 +27,7 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
           ref={ref}
           {...rest}
         />
-      </div>
+    
     );
   }
 );

@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { Toaster } from 'react-hot-toast'
 import LoadPage from './pages/loadpage/LoadPage'
 import LogInPage from './pages/login/LogInPage'
 import Dashboard from './pages/dashboard/Dashboard'
@@ -8,7 +9,9 @@ import DashboardRedirect from './context/DashboardRedirect'
 
 function App() {
   return (
+    
       <BrowserRouter>
+         
         <Routes>
           {/* Public route */}
           <Route path="/" element={<LoadPage />} />
