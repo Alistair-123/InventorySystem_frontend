@@ -1,5 +1,5 @@
-import axios, { AxiosInstance } from "axios";
-
+import axios from "axios";
+import type { AxiosInstance } from "axios";
 // Base URL is read from Vite env variable VITE_API_URL, fallback to localhost
 const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 

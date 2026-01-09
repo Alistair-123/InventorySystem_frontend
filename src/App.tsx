@@ -1,25 +1,34 @@
-import { Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import LoadPage from './pages/loadpage/LoadPage'
+import LogInPage from './pages/login/LogInPage'
+import Dashboard from './pages/dashboard/Dashboard'
+import Test from './pages/test/Test'
+import Layout from './layout/Layout'
+import DashboardRedirect from './context/DashboardRedirect'
 
-import LoadPage from "./pages/loadpage/LoadPage";
-import LogInPage from "./pages/login/LogInPage";
-import Dashboard from "./pages/dashboard/Dashboard";
-import Test from "./pages/test/Test";
-import Layout from "./layout/Layout";
-
-const App: React.FC = () => {
+function App() {
   return (
-    <Routes>
-      {/* Public routes */}
-      <Route path="/" element={<LoadPage />} />
-      <Route path="/login" element={<LogInPage />} />
-
-      {/* Protected layout */}
-      <Route element={<Layout />}>
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/test" element={<Test />} />
-      </Route>
-    </Routes>
-  );
-};
+      <BrowserRouter>
+        <Routes>
+          {/* Public route */}
+          <Route path="/" element={<LoadPage />} />
+          <Route path="/login" element={<LogInPage />} />
+          <Route path="/test" element={<Test />} />
+          {/* Protected / App layout */}
+          <Route  element={<Layout />}>
+            <Route
+              path="/dashboard"
+              element={
+                <DashboardRedirect>
+                  <Dashboard />
+                </DashboardRedirect>
+              }
+            />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+   
+  )
+}
 
 export default App;
