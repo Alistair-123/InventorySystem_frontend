@@ -11,6 +11,11 @@
 }
 
 @font-face {
+    font-family: Poppins-Black;
+    src: url(../src/assets/fonts/Poppins-Black.ttf);
+}
+
+@font-face {
     font-family: Poppins-ExtraBoldItalic;
     src: url(../src/assets/fonts/Poppins-ExtraBoldItalic.ttf);
 }
@@ -21,4 +26,5 @@
     --font-poppins: Poppins;
     --font-med: Poppins-Medium;
     --font-extrabolditalic: Poppins-ExtraBoldItalic;
+    --font-black: Poppins-Black;
 }
