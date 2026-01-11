@@ -4,10 +4,10 @@ import { Outlet } from 'react-router-dom'
 
 function Layout() {
   return (
-    <div>
+    <div className='flex h-dvh overflow-hidden'>
       <Sidebar />
 
-      <main>
+      <main className='flex-1 bg-white overflow-y-auto min-w-0'>
         <Outlet />
       </main>
     </div>
