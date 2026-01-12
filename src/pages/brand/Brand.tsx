@@ -1,9 +1,10 @@
+import Dashboardheader from '@/components/Dashboardheader'
 import React from 'react'
 
 function Brand() {
   return (
     <div>
-      This is brands
+      <Dashboardheader title="Brand Management" />
     </div>
   )
 }
