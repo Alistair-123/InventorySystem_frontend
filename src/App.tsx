@@ -13,6 +13,7 @@ import Brand from './pages/brand/Brand'
 import Units from './pages/unit/Units'
 import Office from './pages/office/Office'
 import Acquisitions from './pages/acquisitions/Acquisitions'
+import Items from './pages/items/Items'
 function App() {
   return (
       <BrowserRouter>
@@ -38,6 +39,8 @@ function App() {
             <Route path='/units' element={<Units />} />
             <Route path='/offices' element={<Office />} />
             <Route path='/acquisitions' element={<Acquisitions />} />
+
+            <Route path="/items" element={<Items />} />
           </Route>
         </Routes>
       </BrowserRouter>
