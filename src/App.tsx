@@ -7,26 +7,37 @@ import Test from './pages/test/Test'
 import Layout from './layout/Layout'
 import DashboardRedirect from './context/DashboardRedirect'
 
+
+import Category from './pages/category/Category'
+import Brand from './pages/brand/Brand'
+import Units from './pages/unit/Units'
+import Office from './pages/office/Office'
+import Acquisitions from './pages/acquisitions/Acquisitions'
 function App() {
   return (
-    
       <BrowserRouter>
-         
         <Routes>
           {/* Public route */}
           <Route path="/" element={<LoadPage />} />
           <Route path="/login" element={<LogInPage />} />
           <Route path="/test" element={<Test />} />
+           <Route  path="*" element={<div>404 Not Found</div>} />
           {/* Protected / App layout */}
           <Route  element={<Layout />}>
             <Route
               path="/dashboard"
               element={
-                <DashboardRedirect>
+                // <DashboardRedirect>
                   <Dashboard />
-                </DashboardRedirect>
+                // </DashboardRedirect>
               }
             />
+            
+            <Route path="/categories" element={<Category />} />
+            <Route path='/brands' element={<Brand />} />
+            <Route path='/units' element={<Units />} />
+            <Route path='/offices' element={<Office />} />
+            <Route path='/acquisitions' element={<Acquisitions />} />
           </Route>
         </Routes>
       </BrowserRouter>
