@@ -1,7 +1,14 @@
-import axiosInstance from "@/utils/axiosInstance";
-import type { Category } from './type';
+import axiosInstance from "@/utils/axiosInstance"
+import type { CreateCategoryPayload } from "./type"
 
-export async function createcategory(): Promise<Category[]> {
-  const {data} = await axiosInstance.get<Category[]>("/category/createcategory");
+export async function createCategory(
+  payload: CreateCategoryPayload
+): Promise<CreateCategoryPayload> {
+  
+  const { data } = await axiosInstance.post<CreateCategoryPayload>(
+    "/category/createcategory",
+    payload
+  )
   return data
 }
+

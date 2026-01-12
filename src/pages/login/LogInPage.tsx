@@ -91,7 +91,8 @@ function LogInPage() {
           </div>
         </div>
 
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center"
+        style={{ fontFamily: "'Poppins', sans-serif" }}>
           <Card className="w-full max-w-md rounded-2xl shadow-x1 backdrop-blur-[5px] bg-transparent border border-gray/30 p-8">
             <form
               onSubmit={handleSubmit(onSubmit)}

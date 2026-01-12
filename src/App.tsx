@@ -14,6 +14,14 @@ import Units from './pages/unit/Units'
 import Office from './pages/office/Office'
 import Acquisitions from './pages/acquisitions/Acquisitions'
 import Items from './pages/items/Items'
+import Properties from './pages/properties/Properties'
+import AdjustmentRecords from './pages/adjustment records/AdjustmentRecords'
+import InventorySummary from './pages/inventory summary/InventorySummary'
+import PropertyStatus from './pages/property status/PropertyStatus'
+import PropertiesPerPersonnel from './pages/properties per personnel/PropertiesPerPersonnel'
+import PropertiesPerCategory from './pages/properties per category/PropertiesPerCategory'
+import PropertiesPerItem from './pages/properties per item/PropertiesPerItem'
+
 function App() {
   return (
       <BrowserRouter>
@@ -28,9 +36,9 @@ function App() {
             <Route
               path="/dashboard"
               element={
-                // <DashboardRedirect>
+                //  <DashboardRedirect>
                   <Dashboard />
-                // </DashboardRedirect>
+                //  </DashboardRedirect>
               }
             />
             
@@ -39,8 +47,14 @@ function App() {
             <Route path='/units' element={<Units />} />
             <Route path='/offices' element={<Office />} />
             <Route path='/acquisitions' element={<Acquisitions />} />
-
             <Route path="/items" element={<Items />} />
+            <Route path="/properties" element={<Properties />} />
+            <Route path="/adjustment-records" element={<AdjustmentRecords />} />
+            <Route path="/reports/inventory-summary" element={<InventorySummary />} />
+            <Route path="/reports/property-status" element={<PropertyStatus />} />
+            <Route path="/reports/properties-per-category" element={<PropertiesPerCategory />} />
+            <Route path="reports/properties-per-item" element={<PropertiesPerItem />} />
+            <Route path="/reports/properties-per-personnel" element={<PropertiesPerPersonnel />} />
           </Route>
         </Routes>
       </BrowserRouter>
