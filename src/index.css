@@ -11,8 +11,33 @@
 }
 
 @font-face {
+    font-family: Poppins-MediumItalic;
+    src: url(../src/assets/fonts/Poppins-MediumItalic.ttf);
+}
+
+@font-face {
+    font-family: Poppins-SemiBold;
+    src: url(../src/assets/fonts/Poppins-SemiBold.ttf);
+}
+
+@font-face {
+    font-family: Poppins-SemiBoldItalic;
+    src: url(../src/assets/fonts/Poppins-SemiBoldItalic.ttf);
+}
+
+@font-face {
+    font-family: Poppins-Bold;
+    src: url(../src/assets/fonts/Poppins-Bold.ttf);
+}
+
+@font-face {
     font-family: Poppins-Black;
     src: url(../src/assets/fonts/Poppins-Black.ttf);
+}
+
+@font-face {
+    font-family: Poppins-ExtraBold;
+    src: url(../src/assets/fonts/Poppins-ExtraBold.ttf);
 }
 
 @font-face {
@@ -20,11 +45,14 @@
     src: url(../src/assets/fonts/Poppins-ExtraBoldItalic.ttf);
 }
 
-/* COMMENT RANI */
-
 @theme  {
     --font-poppins: Poppins;
     --font-med: Poppins-Medium;
+    --font-meditalic: Poppins-MediumItalic
+    --font-semibold: Poppins-SemiBold;
+    --font-semibold: Poppins-SemiBoldItalic;
+    --font-bold: Poppins-Bold;
+    --font-extrabold: Poppins-ExtraBold;
     --font-extrabolditalic: Poppins-ExtraBoldItalic;
     --font-black: Poppins-Black;
 }
