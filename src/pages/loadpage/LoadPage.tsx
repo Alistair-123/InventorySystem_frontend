@@ -94,7 +94,7 @@ function LoadPage() {
           fontStyle: "italic",
           animation: isAnimating
             ? "fadeOut 0.5s ease forwards"
-            : "float 6s ease-in-out infinite",
+            : "float 4s ease-in-out infinite",
           textShadow: `
             0 10px 25px rgba(0,0,0,0.35),
             0 25px 50px rgba(0,0,0,0.15)
