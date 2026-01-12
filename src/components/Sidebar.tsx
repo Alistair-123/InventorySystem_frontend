@@ -3,7 +3,6 @@ import { NavLink } from "react-router-dom";
 import { sidebarData } from "./Data";
 import logos from "../assets/logos.png";
 import DictLongLogo from "../assets/DictLongLogo.png";
-
 type SidebarItem = {
   label: string;
   url: string;
@@ -21,7 +20,8 @@ function Sidebar() {
 
   return (
     <aside className="w-[256px] bg-gray-50 border h-screen p-4 space-y-2 overflow-y-auto">
-      <img src={DictLongLogo} alt="Logo" className="w-40 mb-6 mx-auto" />
+
+      <img src={DictLongLogo} alt="Logo" className="w-40 mb-6 mx-auto " />
 
       {Object.entries(sidebarData).map(([key, section]) => {
         const items = Object.values(section.items) as SidebarItem[];
