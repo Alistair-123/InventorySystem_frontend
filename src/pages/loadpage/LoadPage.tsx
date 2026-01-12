@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function LoadPage() {
@@ -8,15 +8,14 @@ function LoadPage() {
   const titleSize = "25px";
   const systemSize = "6.5rem";
 
+
   const handleContinue = () => {
     if (isAnimating) return;
     setIsAnimating(true);
-
     setTimeout(() => {
       navigate("/login");
     }, 2200);
   };
-
   const keyframes = `
     @keyframes float {
       0% { transform: translateY(0px); }
@@ -94,7 +93,7 @@ function LoadPage() {
           fontStyle: "italic",
           animation: isAnimating
             ? "fadeOut 0.5s ease forwards"
-            : "float 6s ease-in-out infinite",
+            : "float 4s ease-in-out infinite",
           textShadow: `
             0 10px 25px rgba(0,0,0,0.35),
             0 25px 50px rgba(0,0,0,0.15)
