@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { NavLink, useLocation } from "react-router-dom";
 import { sidebarData } from "./Data";
 
 import DictLongLogo from "../assets/DictLongLogo.png";
@@ -24,15 +24,47 @@ const iconMap: Record<string, string> = {
   Reports: ReportsIcon,
 };
 
+const baseNav =
+  "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium " +
+  "transition-all duration-200 ease-out";
+
 function Sidebar() {
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+  const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+
+  const isChildActive = (items: SidebarItem[]) =>
+    items.some((item) => location.pathname === item.url);
+
+  /* Auto-open ONLY the matching accordion on route change */
+  useEffect(() => {
+    const next: Record<string, boolean> = {};
+
+    Object.entries(sidebarData).forEach(([key, section]) => {
+      const items = Object.values(section.items) as SidebarItem[];
+      next[key] = items.length > 1 && isChildActive(items);
+    });
+
+    setOpenSections(next);
+  }, [location.pathname]);
 
   const toggleSection = (key: string) => {
-    setOpenSections((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
+    setOpenSections((prev) => {
+      const isCurrentlyOpen = prev[key];
+
+      // If collapsed → expand sidebar and open only this section
+      if (collapsed) {
+        setCollapsed(false);
+        return { [key]: true };
+      }
+
+      // ONE accordion at a time
+      if (isCurrentlyOpen) {
+        return {}; // close all
+      }
+
+      return { [key]: true }; // open only this
+    });
   };
 
   return (
@@ -42,37 +74,33 @@ function Sidebar() {
       ${collapsed ? "w-14" : "w-64"}`}
       style={{ fontFamily: "'Poppins', sans-serif" }}
     >
-      {/* EDGE TOGGLE ZONE */}
+      {/* EDGE TOGGLE */}
       <div
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute top-0 right-0 h-full w-2 cursor-ew-resize
-        hover:bg-blue-100/40 transition"
-        title="Toggle sidebar"
+        className="absolute top-0 right-0 h-full w-2 cursor-ew-resize hover:bg-blue-100/40"
       />
 
-      {/* HEADER / LOGO (CLICK TO TOGGLE) */}
+      {/* LOGO TOGGLE */}
       <div
         onClick={() => setCollapsed(!collapsed)}
         className="h-20 flex items-center justify-center border-b border-gray-200
-        cursor-pointer select-none group"
-        title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        cursor-pointer group"
       >
         <img
           src={collapsed ? SmallLogo : DictLongLogo}
-          alt="DICT Logo"
-          className={`transition-all duration-300
-          ${collapsed ? "h-10" : "h-16"}
-          group-hover:scale-105`}
+          className={`transition-all duration-300 ${
+            collapsed ? "h-10" : "h-16"
+          } group-hover:scale-105`}
         />
       </div>
 
-      {/* NAVIGATION */}
+      {/* NAV */}
       <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
         {Object.entries(sidebarData).map(([key, section]) => {
           const items = Object.values(section.items) as SidebarItem[];
+          const iconSrc = iconMap[section.label];
           const isAccordion = items.length > 1;
           const isOpen = openSections[key];
-          const iconSrc = iconMap[section.label];
 
           /* SINGLE ITEM */
           if (!isAccordion) {
@@ -81,34 +109,31 @@ function Sidebar() {
               <NavLink
                 key={item.url}
                 to={item.url}
+                end
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium
-                   transition-all duration-200 ease-out
-                   ${
-                     isActive
-                       ? "bg-gray-100 text-gray-900 border-l-4 border-blue-600"
-                       : "text-gray-700 hover:bg-gray-50 hover:translate-x-1"
-                   }`
+                  `${baseNav}
+                  ${
+                    isActive
+                      ? "bg-blue-50 text-blue-700 border-l-4 border-blue-600"
+                      : "text-gray-700 hover:bg-gray-50 hover:translate-x-1"
+                  }`
                 }
               >
-                {iconSrc && (
-                  <img src={iconSrc} className="w-5 h-5 opacity-80" />
-                )}
-                {!collapsed && <span>{item.label}</span>}
+                {iconSrc && <img src={iconSrc} className="w-5 h-5 opacity-80" />}
+                {!collapsed && item.label}
               </NavLink>
             );
           }
 
-          /* ACCORDION SECTION */
+          /* ACCORDION */
           return (
             <div key={key}>
               <button
                 onClick={() => toggleSection(key)}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-md
-                text-sm font-semibold transition-all duration-200
+                className={`${baseNav} w-full justify-between
                 ${
                   isOpen
-                    ? "bg-gray-100 text-gray-900"
+                    ? "bg-blue-50 text-blue-700"
                     : "text-gray-700 hover:bg-gray-50"
                 }`}
               >
@@ -116,13 +141,14 @@ function Sidebar() {
                   {iconSrc && (
                     <img src={iconSrc} className="w-5 h-5 opacity-80" />
                   )}
-                  {!collapsed && <span>{section.label}</span>}
+                  {!collapsed && section.label}
                 </div>
 
                 {!collapsed && (
                   <svg
-                    className={`w-4 h-4 text-gray-500 transition-transform duration-300
-                    ${isOpen ? "rotate-90" : ""}`}
+                    className={`w-4 h-4 transition-transform duration-300 ${
+                      isOpen ? "rotate-90" : ""
+                    }`}
                     fill="none"
                     stroke="currentColor"
                     strokeWidth={2}
@@ -133,29 +159,28 @@ function Sidebar() {
                 )}
               </button>
 
-              {/* SMOOTH ACCORDION */}
+              {/* CHILDREN */}
               <div
                 className={`overflow-hidden transition-all duration-300 ease-in-out
-                ${!collapsed && isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}
+                ${isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}
               >
-                <ul className="mt-1 ml-6 space-y-1 border-l border-gray-200 pl-3">
+                <ul className="mt-1 ml-6 border-l border-gray-200 pl-3 space-y-1">
                   {items.map((item) => (
-                    <li key={item.url}>
-                      <NavLink
-                        to={item.url}
-                        className={({ isActive }) =>
-                          `block px-3 py-2 rounded-md text-sm
-                           transition-all duration-200 ease-out
-                           ${
-                             isActive
-                               ? "bg-blue-50 text-blue-700 font-medium"
-                               : "text-gray-600 hover:bg-gray-50 hover:translate-x-1"
-                           }`
-                        }
-                      >
-                        {item.label}
-                      </NavLink>
-                    </li>
+                    <NavLink
+                      key={item.url}
+                      to={item.url}
+                      end
+                      className={({ isActive }) =>
+                        `${baseNav}
+                        ${
+                          isActive
+                            ? "bg-blue-50 text-blue-700 font-medium"
+                            : "text-gray-600 hover:bg-gray-50 hover:translate-x-1"
+                        }`
+                      }
+                    >
+                      {!collapsed && item.label}
+                    </NavLink>
                   ))}
                 </ul>
               </div>
