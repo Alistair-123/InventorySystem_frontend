@@ -1,4 +1,4 @@
-git checkout feature/my-new-feature
+git checkout -b feature/my-new-feature
 git pull
 # make changes
 git add .
