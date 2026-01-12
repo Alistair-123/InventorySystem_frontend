@@ -57,7 +57,7 @@ function Sidebar() {
                 key={item.url}
                 to={item.url}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium
+                  `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-semibold
                    transition-all duration-200
                    ${
                      isActive
