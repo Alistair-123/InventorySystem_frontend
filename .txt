@@ -1,0 +1,21 @@
+git checkout feature/my-new-feature
+git pull
+# make changes
+git add .
+git commit -m "Improve validation logic"
+git push
+
+Or specific files:
+
+git add src/components/Navbar.tsx
+
+
+git push --set-upstream origin feature/protectedRoute
+
+The root cause is that when you create a new local branch with git checkout -b feature/protectedRoute, it only exists locally—it’s not yet linked or connected to any branch on the remote repository.
+
+Because Git doesn’t automatically know where to push this new branch, it requires you to explicitly tell it the remote branch to track when you push for the first time.
+
+Without setting this upstream (tracking) branch, git push has no default destination for your new branch, so it throws that error.
+
+In short: New local branches don’t automatically have a remote counterpart or tracking setup until you push with the upstream flag.
