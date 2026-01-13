@@ -36,9 +36,9 @@ function App() {
             <Route
               path="/dashboard"
               element={
-                //  <DashboardRedirect>
+                  <DashboardRedirect>
                   <Dashboard />
-                //  </DashboardRedirect>
+                  </DashboardRedirect>
               }
             />
             

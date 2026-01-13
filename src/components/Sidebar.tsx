@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import React, { useState } from "react";
+import { NavLink } from "react-router-dom";
 import { sidebarData } from "./Data";
 
 import DictLongLogo from "../assets/DictLongLogo.png";
@@ -10,6 +10,8 @@ import MasterDataIcon from "../assets/icons/icons_masterdata.svg";
 import TransactionsIcon from "../assets/icons/icons_inventorymanagement.svg";
 import AdjustmentsIcon from "../assets/icons/icons_adjust.svg";
 import ReportsIcon from "../assets/icons/icons_reports.svg";
+
+import ProfileComponent from "./ProfileComponent";
 
 type SidebarItem = {
   label: string;
@@ -29,68 +31,40 @@ const baseNav =
   "transition-all duration-200 ease-out";
 
 function Sidebar() {
-  const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
-
-  const isChildActive = (items: SidebarItem[]) =>
-    items.some((item) => location.pathname === item.url);
-
-  /* Auto-open ONLY the matching accordion on route change */
-  useEffect(() => {
-    const next: Record<string, boolean> = {};
-
-    Object.entries(sidebarData).forEach(([key, section]) => {
-      const items = Object.values(section.items) as SidebarItem[];
-      next[key] = items.length > 1 && isChildActive(items);
-    });
-
-    setOpenSections(next);
-  }, [location.pathname]);
+  const [openSection, setOpenSection] = useState<string | null>(null);
 
   const toggleSection = (key: string) => {
-    setOpenSections((prev) => {
-      const isCurrentlyOpen = prev[key];
-
-      // If collapsed → expand sidebar and open only this section
-      if (collapsed) {
-        setCollapsed(false);
-        return { [key]: true };
-      }
-
-      // ONE accordion at a time
-      if (isCurrentlyOpen) {
-        return {}; // close all
-      }
-
-      return { [key]: true }; // open only this
-    });
+    if (collapsed) {
+      setCollapsed(false);
+      setOpenSection(key);
+      return;
+    }
+    setOpenSection(prev => (prev === key ? null : key));
   };
 
   return (
     <aside
       className={`relative h-screen bg-white border-r border-gray-200 flex flex-col
-      transition-all duration-300 ease-in-out
-      ${collapsed ? "w-14" : "w-64"}`}
+      transition-all duration-300 ${collapsed ? "w-14" : "w-64"}`}
       style={{ fontFamily: "'Poppins', sans-serif" }}
     >
       {/* EDGE TOGGLE */}
       <div
-        onClick={() => setCollapsed(!collapsed)}
+        onClick={() => setCollapsed(v => !v)}
         className="absolute top-0 right-0 h-full w-2 cursor-ew-resize hover:bg-blue-100/40"
       />
 
-      {/* LOGO TOGGLE */}
+      {/* LOGO */}
       <div
-        onClick={() => setCollapsed(!collapsed)}
-        className="h-20 flex items-center justify-center border-b border-gray-200
-        cursor-pointer group"
+        onClick={() => setCollapsed(v => !v)}
+        className="h-20 flex items-center justify-center border-b border-gray-200 cursor-pointer"
       >
         <img
           src={collapsed ? SmallLogo : DictLongLogo}
           className={`transition-all duration-300 ${
             collapsed ? "h-10" : "h-16"
-          } group-hover:scale-105`}
+          }`}
         />
       </div>
 
@@ -98,9 +72,9 @@ function Sidebar() {
       <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
         {Object.entries(sidebarData).map(([key, section]) => {
           const items = Object.values(section.items) as SidebarItem[];
-          const iconSrc = iconMap[section.label];
           const isAccordion = items.length > 1;
-          const isOpen = openSections[key];
+          const isOpen = openSection === key;
+          const iconSrc = iconMap[section.label];
 
           /* SINGLE ITEM */
           if (!isAccordion) {
@@ -111,15 +85,14 @@ function Sidebar() {
                 to={item.url}
                 end
                 className={({ isActive }) =>
-                  `${baseNav}
-                  ${
+                  `${baseNav} ${
                     isActive
                       ? "bg-blue-50 text-blue-700 border-l-4 border-blue-600"
                       : "text-gray-700 hover:bg-gray-50 hover:translate-x-1"
                   }`
                 }
               >
-                {iconSrc && <img src={iconSrc} className="w-5 h-5 opacity-80" />}
+                {iconSrc && <img src={iconSrc} className="w-5 h-5" />}
                 {!collapsed && item.label}
               </NavLink>
             );
@@ -130,23 +103,20 @@ function Sidebar() {
             <div key={key}>
               <button
                 onClick={() => toggleSection(key)}
-                className={`${baseNav} w-full justify-between
-                ${
+                className={`${baseNav} w-full justify-between ${
                   isOpen
                     ? "bg-blue-50 text-blue-700"
                     : "text-gray-700 hover:bg-gray-50"
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  {iconSrc && (
-                    <img src={iconSrc} className="w-5 h-5 opacity-80" />
-                  )}
+                  {iconSrc && <img src={iconSrc} className="w-5 h-5" />}
                   {!collapsed && section.label}
                 </div>
 
                 {!collapsed && (
                   <svg
-                    className={`w-4 h-4 transition-transform duration-300 ${
+                    className={`w-4 h-4 transition-transform ${
                       isOpen ? "rotate-90" : ""
                     }`}
                     fill="none"
@@ -159,20 +129,19 @@ function Sidebar() {
                 )}
               </button>
 
-              {/* CHILDREN */}
               <div
-                className={`overflow-hidden transition-all duration-300 ease-in-out
-                ${isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}
+                className={`overflow-hidden transition-all duration-300 ${
+                  isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+                }`}
               >
                 <ul className="mt-1 ml-6 border-l border-gray-200 pl-3 space-y-1">
-                  {items.map((item) => (
+                  {items.map(item => (
                     <NavLink
                       key={item.url}
                       to={item.url}
                       end
                       className={({ isActive }) =>
-                        `${baseNav}
-                        ${
+                        `${baseNav} ${
                           isActive
                             ? "bg-blue-50 text-blue-700 font-medium"
                             : "text-gray-600 hover:bg-gray-50 hover:translate-x-1"
@@ -188,6 +157,13 @@ function Sidebar() {
           );
         })}
       </nav>
+
+      {/* PROFILE */}
+      <ProfileComponent
+  collapsed={collapsed}
+  onExpandSidebar={() => setCollapsed(false)}
+/>
+
     </aside>
   );
 }

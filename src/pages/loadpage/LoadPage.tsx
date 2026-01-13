@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function LoadPage() {
@@ -42,6 +42,10 @@ function LoadPage() {
         transform: translateY(-140px);
       }
     }
+      button:hover .hover-glow {
+  opacity: 1;
+}
+
   `;
 
   const fadeStyle = isAnimating
@@ -105,48 +109,88 @@ function LoadPage() {
       </h2>
 
       <button
-        onClick={handleContinue}
-        disabled={isAnimating}
-        style={{
-          marginTop: "1.5rem",
-          height: "52px",
-          width: isAnimating ? "56px" : "220px",
-          borderRadius: "999px",
-          border: "none",
-          cursor: isAnimating ? "default" : "pointer",
-          backgroundColor: "rgba(19, 73, 145, 1)",
-          color: "#ffffff",
-          boxShadow: "0 10px 25px rgba(0,0,0,0.25)",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          overflow: "hidden",
-          transition: "width 0.6s ease, box-shadow 0.3s ease",
-          animation: isAnimating ? "riseAndCenter 0.8s ease forwards" : "none",
-        }}
-      >
-        {!isAnimating ? (
-          <span
-            style={{
-              fontSize: "1.1rem",
-              fontWeight: 600,
-            }}
-          >
-            Continue
-          </span>
-        ) : (
-          <span
-            style={{
-              width: "22px",
-              height: "22px",
-              border: "3px solid rgba(255,255,255,0.3)",
-              borderTopColor: "#ffffff",
-              borderRadius: "50%",
-              animation: "spin 0.8s linear infinite",
-            }}
-          />
-        )}
-      </button>
+  onClick={handleContinue}
+  disabled={isAnimating}
+  style={{
+    marginTop: "1.5rem",
+    height: "52px",
+    width: isAnimating ? "56px" : "220px",
+    borderRadius: "999px",
+    border: "none",
+    cursor: isAnimating ? "default" : "pointer",
+    background: isAnimating
+      ? "rgba(19, 73, 145, 1)"
+      : "linear-gradient(135deg, rgba(19,73,145,1), rgba(30,96,190,1))",
+    color: "#ffffff",
+    boxShadow: isAnimating
+      ? "0 10px 25px rgba(0,0,0,0.25)"
+      : "0 12px 30px rgba(19,73,145,0.45)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
+    position: "relative",
+    transition:
+      "width 0.6s ease, transform 0.25s ease, box-shadow 0.25s ease",
+    animation: isAnimating ? "riseAndCenter 0.8s ease forwards" : "none",
+  }}
+  onMouseEnter={(e) => {
+    if (isAnimating) return;
+    e.currentTarget.style.transform = "translateY(-2px)";
+    e.currentTarget.style.boxShadow =
+      "0 18px 40px rgba(19,73,145,0.55)";
+  }}
+  onMouseLeave={(e) => {
+    if (isAnimating) return;
+    e.currentTarget.style.transform = "translateY(0)";
+    e.currentTarget.style.boxShadow =
+      "0 12px 30px rgba(19,73,145,0.45)";
+  }}
+>
+  {/* Hover glow layer */}
+  
+  {!isAnimating && (
+    <span
+      style={{
+        position: "absolute",
+        inset: 0,
+        borderRadius: "999px",
+        background:
+          "linear-gradient(120deg, transparent, rgba(255,255,255,0.25), transparent)",
+        opacity: 0,
+        transition: "opacity 0.3s ease",
+        pointerEvents: "none",
+      }}
+      className="hover-glow"
+    />
+  )}
+
+  {!isAnimating ? (
+    <span
+      style={{
+        fontSize: "1.1rem",
+        fontWeight: 600,
+        letterSpacing: "0.04em",
+        zIndex: 1,
+      }}
+    >
+      Continue
+    </span>
+  ) : (
+    <span
+      style={{
+        width: "22px",
+        height: "22px",
+        border: "3px solid rgba(255,255,255,0.3)",
+        borderTopColor: "#ffffff",
+        borderRadius: "50%",
+        animation: "spin 0.8s linear infinite",
+        
+      }}
+    />
+  )}
+</button>
+
     </div>
   );
 }
