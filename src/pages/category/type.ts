@@ -1,3 +1,7 @@
+export interface ApiResponse<T> {
+  success: boolean
+  data: T
+}
 export type CategoryStatus = 'active' | 'inactive';
 
 export interface CreateCategoryPayload {
@@ -5,3 +9,10 @@ export interface CreateCategoryPayload {
     categoryName: string;
     status: CategoryStatus;
 };
+
+export interface GetCategory {
+  categoryId: string
+  categoryName: string
+  status: "active" | "inactive"
+  createdAt: string
+}
