@@ -98,8 +98,8 @@ function Category() {
           <TableCaption>List of Categories</TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead>Name</TableHead>
+              <TableHead className="pl-10 text-start ">Category ID</TableHead>
+              <TableHead className="text-start">Category Name</TableHead>
               <TableHead className="text-end">Status</TableHead>
               <TableHead className="text-end">Actions</TableHead>
             </TableRow>
