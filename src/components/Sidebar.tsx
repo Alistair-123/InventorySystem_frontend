@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { sidebarData } from "./Data";
+import {
+  masterdataConfig,
+  transactionsConfig,
+  reportsConfig,
+} from "./sidebarData";
 
 import DictLongLogo from "../assets/DictLongLogo.png";
 import SmallLogo from "../assets/logos.png";
@@ -40,31 +45,31 @@ function Sidebar() {
       setOpenSection(key);
       return;
     }
-    setOpenSection(prev => (prev === key ? null : key));
+    setOpenSection((prev) => (prev === key ? null : key));
   };
 
   return (
     <aside
       className={`relative h-screen bg-white border-r border-gray-200 flex flex-col
-      transition-all duration-300 ${collapsed ? "w-14" : "w-64"}`}
+      transition-all duration-300 ease-in-out ${collapsed ? "w-14" : "w-64"}`}
       style={{ fontFamily: "'Poppins', sans-serif" }}
     >
       {/* EDGE TOGGLE */}
       <div
-        onClick={() => setCollapsed(v => !v)}
+        onClick={() => setCollapsed((v) => !v)}
         className="absolute top-0 right-0 h-full w-2 cursor-ew-resize hover:bg-blue-100/40"
       />
 
       {/* LOGO */}
       <div
-        onClick={() => setCollapsed(v => !v)}
-        className="h-20 flex items-center justify-center border-b border-gray-200 cursor-pointer"
+        onClick={() => setCollapsed((v) => !v)}
+        className="h-20 flex items-center justify-center border-b border-gray-200 cursor-pointer group"
       >
         <img
           src={collapsed ? SmallLogo : DictLongLogo}
           className={`transition-all duration-300 ${
             collapsed ? "h-10" : "h-16"
-          }`}
+          } group-hover:scale-105`}
         />
       </div>
 
@@ -92,7 +97,7 @@ function Sidebar() {
                   }`
                 }
               >
-                {iconSrc && <img src={iconSrc} className="w-5 h-5" />}
+                {iconSrc && <img src={iconSrc} className="w-5 h-5 opacity-80" />}
                 {!collapsed && item.label}
               </NavLink>
             );
@@ -110,13 +115,15 @@ function Sidebar() {
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  {iconSrc && <img src={iconSrc} className="w-5 h-5" />}
+                  {iconSrc && (
+                    <img src={iconSrc} className="w-5 h-5 opacity-80" />
+                  )}
                   {!collapsed && section.label}
                 </div>
 
                 {!collapsed && (
                   <svg
-                    className={`w-4 h-4 transition-transform ${
+                    className={`w-4 h-4 transition-transform duration-300 ${
                       isOpen ? "rotate-90" : ""
                     }`}
                     fill="none"
@@ -129,28 +136,43 @@ function Sidebar() {
                 )}
               </button>
 
+              {/* CHILDREN */}
               <div
-                className={`overflow-hidden transition-all duration-300 ${
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${
                   isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
                 }`}
               >
                 <ul className="mt-1 ml-6 border-l border-gray-200 pl-3 space-y-1">
-                  {items.map(item => (
-                    <NavLink
-                      key={item.url}
-                      to={item.url}
-                      end
-                      className={({ isActive }) =>
-                        `${baseNav} ${
-                          isActive
-                            ? "bg-blue-50 text-blue-700 font-medium"
-                            : "text-gray-600 hover:bg-gray-50 hover:translate-x-1"
-                        }`
-                      }
-                    >
-                      {!collapsed && item.label}
-                    </NavLink>
-                  ))}
+                  {(section.label === "Master Data"
+                    ? Object.values(masterdataConfig)
+                    : section.label === "Transactions"
+                    ? Object.values(transactionsConfig)
+                    : section.label === "Reports"
+                    ? Object.values(reportsConfig)
+                    : items
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  ).map((item: any) => {
+                    const Icon = item.icon;
+                    return (
+                      <NavLink
+                        key={item.url}
+                        to={item.url}
+                        end
+                        className={({ isActive }) =>
+                          `${baseNav} ${
+                            isActive
+                              ? "bg-blue-50 text-blue-700 font-medium"
+                              : "text-gray-600 hover:bg-gray-50 hover:translate-x-1"
+                          }`
+                        }
+                      >
+                        {Icon && !collapsed && (
+                          <Icon size={16} className="opacity-80 mr-2" />
+                        )}
+                        {!collapsed && item.label}
+                      </NavLink>
+                    );
+                  })}
                 </ul>
               </div>
             </div>
@@ -160,10 +182,9 @@ function Sidebar() {
 
       {/* PROFILE */}
       <ProfileComponent
-  collapsed={collapsed}
-  onExpandSidebar={() => setCollapsed(false)}
-/>
-
+        collapsed={collapsed}
+        onExpandSidebar={() => setCollapsed(false)}
+      />
     </aside>
   );
 }
