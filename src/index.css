@@ -154,3 +154,8 @@
     @apply bg-background text-foreground;
     }
 }
+
+body[data-radix-remove-scroll-lock] {
+  overflow: visible !important;
+  pointer-events: auto !important;
+}

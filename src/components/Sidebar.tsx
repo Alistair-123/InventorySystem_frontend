@@ -10,7 +10,7 @@ import MasterDataIcon from "../assets/icons/icons_masterdata.svg";
 import TransactionsIcon from "../assets/icons/icons_inventorymanagement.svg";
 import AdjustmentsIcon from "../assets/icons/icons_adjust.svg";
 import ReportsIcon from "../assets/icons/icons_reports.svg";
-
+import { LuAperture } from "react-icons/lu";
 type SidebarItem = {
   label: string;
   url: string;
@@ -96,6 +96,7 @@ function Sidebar() {
 
       {/* NAV */}
       <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
+      
         {Object.entries(sidebarData).map(([key, section]) => {
           const items = Object.values(section.items) as SidebarItem[];
           const iconSrc = iconMap[section.label];
