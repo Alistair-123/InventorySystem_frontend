@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+*.exe
+*.msi
+*.dmg
+*.zip
+*.tar.gz
