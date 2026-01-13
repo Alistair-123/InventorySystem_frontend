@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { useForm, Controller, type SubmitHandler } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
+
 import Dashboardheader from "@/components/Dashboardheader";
 import Modal from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
@@ -22,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -31,55 +33,67 @@ import {
 
 import { MoreHorizontal } from "lucide-react";
 
-import type { CreateCategoryPayload } from "./type";
-import { createCategory } from "./api";
-import { useCategories } from "./useQuery";
+import type { CreateCategoryPayload } from "./Types/type";
+
+import { useGetCategories } from "./QueryHooks/useGetCategory";
+import { useCreateCategories } from "./QueryHooks/useCreateCategory";
+import { useDeleteCategory } from "./QueryHooks/useDeleteCategory";
+
 function Category() {
   const [isOpen, setIsOpen] = useState(false);
 
-  // for submittin data
+  /** QUERY */
+  const {
+    data: categories = [],
+    isLoading,
+    isError,
+  } = useGetCategories();
+
+  /** MUTATIONS */
+  const createMutation = useCreateCategories();
+  const deleteMutation = useDeleteCategory();
+
   const {
     register,
     handleSubmit,
     control,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     setError,
+    reset,
   } = useForm<CreateCategoryPayload>({
-    defaultValues: {
-      status: "active",
-    },
+    defaultValues: { status: "active" },
   });
 
-  const onSubmit: SubmitHandler<CreateCategoryPayload> = async (data) => {
-    try {
-      await createCategory(data);
-      setIsOpen(false);
-    } catch (error: any) {
-      setError("root", {
-        message: error?.response?.data?.message || "Failed to create category",
-      });
-    }
+  const onSubmit = (data: CreateCategoryPayload) => {
+    createMutation.mutate(data, {
+      onSuccess: () => {
+        reset();
+        setIsOpen(false);
+      },
+      onError: (error: any) => {
+        setError("root", {
+          message:
+            error?.response?.data?.message ||
+            "Failed to create category",
+        });
+      },
+    });
   };
-  // for rendering data
-  const { data: categories, isLoading, isError, error } = useCategories();
 
-  const handleEdit = () => {};
+  const handleDelete = (id: string) => {
+    deleteMutation.mutate(id);
+  };
 
-  const handleDelete = () => {};
   return (
-    <div className="font-poppins ">
+    <div className="font-poppins">
       <Dashboardheader title="Category Management" />
 
       <div className="flex items-center justify-between p-4">
-        <Input
-          type="text"
-          placeholder="Search Categories..."
-          className="w-75"
-        />
+        <Input placeholder="Search Categories..." className="w-75" />
         <Button onClick={() => setIsOpen(true)}>Add Category</Button>
       </div>
 
-      <div className="p-8 overflow-visible">
+      <div className="p-8">
         <Table>
           <TableCaption>List of Categories</TableCaption>
           <TableHeader>
@@ -87,9 +101,10 @@ function Category() {
               <TableHead className="pl-10 text-start ">Category ID</TableHead>
               <TableHead className="text-start">Category Name</TableHead>
               <TableHead className="text-end">Status</TableHead>
-              <TableHead className="pr-20 text-end">Actions</TableHead>
+              <TableHead className="text-end">Actions</TableHead>
             </TableRow>
           </TableHeader>
+
           <TableBody>
             {isLoading && (
               <TableRow>
@@ -107,7 +122,7 @@ function Category() {
               </TableRow>
             )}
 
-            {!isLoading && categories?.length === 0 && (
+            {!isLoading && categories.length === 0 && (
               <TableRow>
                 <TableCell colSpan={4} className="text-center">
                   No categories found
@@ -115,41 +130,28 @@ function Category() {
               </TableRow>
             )}
 
-            {categories?.map((category) => (
+            {categories.map((category) => (
               <TableRow key={category.categoryId}>
-                <TableCell className="pl-10 text-start ">
-                  {category.categoryId}
-                </TableCell>
-                <TableCell className="text-start">
-                  {category.categoryName}
+                <TableCell>{category.categoryId}</TableCell>
+                <TableCell>{category.categoryName}</TableCell>
+                <TableCell className="text-end">
+                  {category.status}
                 </TableCell>
                 <TableCell className="text-end">
-                  <span
-                    className={`px-2 py-1 rounded text-xs font-medium ${
-                      category.status === "active"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-gray-100 text-gray-700"
-                    }`}
-                  >
-                    {category.status}
-                  </span>
-                </TableCell>
-                <TableCell className="text-right pr-20 relative overflow-visible">
                   <DropdownMenu modal={false}>
                     <DropdownMenuTrigger asChild>
-                      <Button className=" rotate-90  hover:bg-gray-300" variant="ghost" size="icon">
-                        <MoreHorizontal className="h-4 w-4 hover:bg-gray-300 " />
+                      <Button variant="ghost" size="icon">
+                        <MoreHorizontal />
                       </Button>
                     </DropdownMenuTrigger>
-                    {/* onClick={() => handleEdit(category)} */}
-                    <DropdownMenuContent 
-                      align="end"
-                      sideOffset={6}
-                      className="z-50"
-                    >
-                      <DropdownMenuItem className="font-poppins">Edit</DropdownMenuItem>
-                      {/*   onClick={() => handleDelete(category.categoryId)} */}
-                      <DropdownMenuItem className="text-red-600 focus:text-red-600 font-poppins">
+
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>Edit</DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="text-red-600"
+                       onClick={() => handleDelete(category._id)}
+
+                      >
                         Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -165,74 +167,51 @@ function Category() {
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         title="Create Category"
-        className="max-w-none"
+        className="font-poppins"
       >
-        <form className="space-y-5 p-8" onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 p-8">
           {errors.root && (
-            <p className="text-sm text-red-500">{errors.root.message}</p>
+            <p className="text-red-500">{errors.root.message}</p>
           )}
 
           <div className="flex gap-4">
             <Label className="w-40">Category ID</Label>
-            <Input
-              {...register("categoryId", {
-                required: "Category ID is required",
-              })}
-            />
+            <Input {...register("categoryId", { required: true })} />
           </div>
 
           <div className="flex gap-4">
             <Label className="w-40">Category Name</Label>
-            <Input
-              {...register("categoryName", {
-                required: "Category name is required",
-              })}
-            />
+            <Input {...register("categoryName", { required: true })} />
           </div>
-
+          
           <div className="flex gap-4">
-            <Label className="w-40">Status</Label>
-
+            <Label className="w-40">
+              Status
+            </Label>
+          
             <Controller
               name="status"
               control={control}
-              rules={{ required: "Status is required" }}
               render={({ field }) => (
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select status" />
+                    <SelectValue />
                   </SelectTrigger>
-
                   <SelectContent>
-                    <SelectItem value="active">
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-green-500" />
-                        Active
-                      </div>
-                    </SelectItem>
-
-                    <SelectItem value="inactive">
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-red-500" />
-                        Inactive
-                      </div>
-                    </SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
                   </SelectContent>
                 </Select>
               )}
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsOpen(false)}
-            >
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setIsOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : "Save"}
+            <Button type="submit" disabled={createMutation.isPending}>
+              {createMutation.isPending ? "Saving..." : "Save"}
             </Button>
           </div>
         </form>
