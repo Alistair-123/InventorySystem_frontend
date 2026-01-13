@@ -71,9 +71,9 @@ function LogInPage() {
         className="absolute bottom-0 left-0 w-[45%] pointer-events-none hidden md:block"
       />
 
-      <div className="relative z-10 flex w-full max-w-6xl px- md:px-10 animate-[fadeIn_0.8s_ease]">
+      <div className="relative z-10 flex w-full max-w-6xl px-6 md:px-10 animate-[fadeIn_0.8s_ease]">
         <div className="hidden md:flex flex-1 flex-col items-center justify-center">
-          <img src={DICT} alt="DICT Logo" className="max-w-sm mb-1" />
+          <img src={DICT} alt="DICT Logo" className="max-w-sm mb-10" />
 
           <div className="text-center leading-[0.9]">
             <div

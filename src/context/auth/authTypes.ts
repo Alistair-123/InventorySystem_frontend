@@ -5,7 +5,6 @@ export type Personnel = {
   personnelId: string;
   firstName: string;
   lastName: string;
-  designationName: string;
   role: Role;
 };
 

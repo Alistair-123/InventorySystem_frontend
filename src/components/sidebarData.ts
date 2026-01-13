@@ -49,4 +49,4 @@ export const reportsConfig: Record<string, SidebarItemConfig> = {
   PropertiesPerCategory: { label: "Properties per Category", url: "/reports/properties-per-category", icon: FaLayerGroup },
   PropertiesPerItem: { label: "Properties per Item", url: "/reports/properties-per-item", icon: FaFileAlt },
   PropertiesPerPersonnel: { label: "Properties per Personnel", url: "/reports/properties-per-personnel", icon: FaUsers },
-}
+};
