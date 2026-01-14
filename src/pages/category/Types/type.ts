@@ -7,7 +7,7 @@ export interface ApiResponse<T> {
 
 export type CategoryStatus = "active" | "inactive"
 
-export interface CreateCategoryPayload {
+export interface CreateCategory {
   categoryId: string
   categoryName: string
   status: CategoryStatus

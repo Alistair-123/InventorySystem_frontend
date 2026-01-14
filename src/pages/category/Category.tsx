@@ -1,11 +1,8 @@
-import React, { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-
+import React, { useState, useEffect, useCallback } from "react";
+import ConfirmAction from "@/components/ActionMenu";
 import Dashboardheader from "@/components/Dashboardheader";
-import Modal from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -15,7 +12,14 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
-
+import Modal from "@/components/ui/modal";
+import { Label } from "@/components/ui/label";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
@@ -23,196 +27,356 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
-
+import axiosInstance from "@/utils/axiosInstance";
+import type { GetCategory, CreateCategory } from "./Types/type";
 import { MoreHorizontal } from "lucide-react";
-
-import type { CreateCategoryPayload } from "./Types/type";
-
-import { useGetCategories } from "./QueryHooks/useGetCategory";
-import { useCreateCategories } from "./QueryHooks/useCreateCategory";
-import { useDeleteCategory } from "./QueryHooks/useDeleteCategory";
+import { useForm, Controller } from "react-hook-form";
+import StatusDot from "@/components/StatusDot";
 
 function Category() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [categories, setCategories] = useState<GetCategory[]>([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 20;
+  const [search, setSearch] = useState("");
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<GetCategory | null>(
+    null
+  );
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmType, setConfirmType] = useState<"delete" | "edit">("delete");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [mode, setMode] = useState<"create" | "edit">("create");
+  const [pendingEditData, setPendingEditData] =
+  useState<CreateCategory | null>(null);
 
-  /** QUERY */
-  const {
-    data: categories = [],
-    isLoading,
-    isError,
-  } = useGetCategories();
+  const fetchData = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setIsError(false);
 
-  /** MUTATIONS */
-  const createMutation = useCreateCategories();
-  const deleteMutation = useDeleteCategory();
+      const res = await axiosInstance.get("/category/getcategories", {
+        params: {
+          page,
+          limit,
+          search,
+        },
+      });
+
+      setCategories(res.data.data ?? []);
+      setTotalPages(res.data.pagination.totalPages);
+    } catch (error) {
+      console.error(error);
+      setIsError(true);
+      setCategories([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [page, limit, search]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const {
     register,
     handleSubmit,
     control,
-    formState: { errors },
-    setError,
     reset,
-  } = useForm<CreateCategoryPayload>({
-    defaultValues: { status: "active" },
+    getValues,
+    formState: { errors, isSubmitting },
+  } = useForm<CreateCategory>({
+    defaultValues: {
+      categoryId: "",
+      categoryName: "",
+      status: "active",
+    },
   });
 
-  const onSubmit = (data: CreateCategoryPayload) => {
-    createMutation.mutate(data, {
-      onSuccess: () => {
-        reset();
-        setIsOpen(false);
-      },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      onError: (error: any) => {
-        setError("root", {
-          message:
-            error?.response?.data?.message ||
-            "Failed to create category",
-        });
-      },
-    });
+ const onSubmit = async (data: CreateCategory) => {
+  if (mode === "edit") {
+    setPendingEditData(data);   // ✅ store snapshot
+    setConfirmType("edit");
+    setConfirmOpen(true);
+    return;
+  }
+
+  await axiosInstance.post("/category/createcategory", data);
+  reset();
+  setIsOpen(false);
+  fetchData();
+};
+ 
+  const handleEdit = (category: GetCategory) => {
+  setMode("edit");
+  setSelectedCategory(category);
+
+  reset({
+    categoryId: category.categoryId,
+    categoryName: category.categoryName,
+    status: category.status,
+  });
+
+  setIsOpen(true);
+};
+
+
+  const handleDeleteClick = (category: GetCategory) => {
+    setSelectedCategory(category);
+    setConfirmType("delete");
+    setConfirmOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    deleteMutation.mutate(id);
+  const handleConfirm = async () => {
+    if (!selectedCategory) return;
+
+    try {
+      setIsProcessing(true);
+
+      if (confirmType === "delete") {
+        await axiosInstance.delete(
+          `/category/deletecategory/${selectedCategory._id}`
+        );
+        fetchData();
+      }
+
+      setConfirmOpen(false);
+      setSelectedCategory(null);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsProcessing(false);
+    }
   };
+
+ const confirmEdit = async () => {
+  if (!selectedCategory || !pendingEditData) return;
+
+  try {
+    setIsProcessing(true);
+
+    await axiosInstance.put(
+      `/category/updatecategory/${selectedCategory._id}`,
+      pendingEditData
+    );
+
+    setConfirmOpen(false);
+    setIsOpen(false);
+    setPendingEditData(null);
+    setSelectedCategory(null);
+    reset();
+    setMode("create");
+
+    fetchData();
+  } finally {
+    setIsProcessing(false);
+  }
+};
+
 
   return (
     <div className="font-poppins">
       <Dashboardheader title="Category Management" />
-
-      <div className="flex items-center justify-between p-4">
-        <Input placeholder="Search Categories..." className="w-75" />
-        <Button onClick={() => setIsOpen(true)}>Add Category</Button>
+      <div className="flex items-center justify-between p-8">
+        <Input
+          type="text"
+          placeholder="Search Brands..."
+          className="w-[300px] font-poppins"
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1); // reset pagination on new search
+          }}
+        />
+        <Button className="cursor-pointer" onClick={() => setIsOpen(true)}>
+          Add Category
+        </Button>
       </div>
 
       <div className="p-8">
-        <Table>
-          <TableCaption>List of Categories</TableCaption>
+        <Table className="p-4">
+          <TableCaption>List of Brands</TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead className="pl-10 text-start ">Category ID</TableHead>
-              <TableHead className="text-start">Category Name</TableHead>
-              <TableHead className="text-end">Status</TableHead>
-              <TableHead className="text-end">Actions</TableHead>
+              <TableHead>#</TableHead>
+              <TableHead className="w-30">Category ID</TableHead>
+              <TableHead>Category Name</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="w-30">Actions</TableHead>
             </TableRow>
           </TableHeader>
-
           <TableBody>
+            {/* 1. Loading */}
             {isLoading && (
               <TableRow>
-                <TableCell colSpan={4} className="text-center">
-                  Loading...
+                <TableCell colSpan={5} className="text-center">
+                  Loading categories...
                 </TableCell>
               </TableRow>
             )}
 
-            {isError && (
+            {/* 2. Error */}
+            {isError && !isLoading && (
               <TableRow>
-                <TableCell colSpan={4} className="text-center text-red-500">
-                  Failed to load categories
+                <TableCell colSpan={5} className="text-center text-red-500">
+                  Failed to load categories.
+                  <Button variant="link" className="ml-2" onClick={fetchData}>
+                    Retry
+                  </Button>
                 </TableCell>
               </TableRow>
             )}
 
-            {!isLoading && categories.length === 0 && (
+            {/* 3. Empty */}
+            {!isLoading && !isError && categories.length === 0 && (
               <TableRow>
-                <TableCell colSpan={4} className="text-center">
+                <TableCell colSpan={5} className="text-center">
                   No categories found
                 </TableCell>
               </TableRow>
             )}
 
-            {categories.map((category) => (
-              <TableRow key={category.categoryId}>
-                <TableCell>{category.categoryId}</TableCell>
-                <TableCell>{category.categoryName}</TableCell>
-                <TableCell className="text-end">
-                  {category.status}
-                </TableCell>
-                <TableCell className="text-end">
-                  <DropdownMenu modal={false}>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreHorizontal />
-                      </Button>
-                    </DropdownMenuTrigger>
+            {/* 4. Success */}
+            {!isLoading &&
+              !isError &&
+              categories.map((category, index) => {
+                const rowNumber = (page - 1) * limit + index + 1;
 
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="text-red-600"
-                       onClick={() => handleDelete(category._id)}
+                return (
+                  <TableRow key={category._id}>
+                    <TableCell className="w-12 text-muted-foreground">
+                      {rowNumber}
+                    </TableCell>
 
-                      >
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
+                    <TableCell>{category.categoryId}</TableCell>
+                    <TableCell>{category.categoryName}</TableCell>
+                    <TableCell>
+                      <StatusDot status={category.status} />
+                    </TableCell>
+
+                    <TableCell className="text-right pr-15">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => handleEdit(category)}
+                          >
+                            Edit
+                          </DropdownMenuItem>
+
+                          <DropdownMenuItem
+                            className="text-red-500 focus:text-red-500"
+                            onClick={() => handleDeleteClick(category)}
+                          >
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
           </TableBody>
         </Table>
+
+        <div className="flex items-center justify-center gap-4 p-4">
+          <Button
+            variant="outline"
+            disabled={page === 1}
+            onClick={() => setPage((prev) => prev - 1)}
+          >
+            Previous
+          </Button>
+
+          <span className="text-sm">
+            Page {page} of {totalPages}
+          </span>
+
+          <Button
+            variant="outline"
+            disabled={page === totalPages}
+            onClick={() => setPage((prev) => prev + 1)}
+          >
+            Next
+          </Button>
+        </div>
       </div>
 
       <Modal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
-        title="Create Category"
-        className="font-poppins"
+        title={mode === "edit" ? "Edit Category" : "Create Category"}
+        className="max-w-none font-poppins"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 p-8">
-          {errors.root && (
-            <p className="text-red-500">{errors.root.message}</p>
-          )}
-
-          <div className="flex gap-4">
-            <Label className="w-40">Category ID</Label>
-            <Input {...register("categoryId", { required: true })} />
+          {/* Category ID */}
+          <div className="flex">
+            <Label className="w-50">Category ID</Label>
+            <Input
+              {...register("categoryId", {
+                required: "Category ID is required",
+              })}
+            />
           </div>
 
-          <div className="flex gap-4">
-            <Label className="w-40">Category Name</Label>
-            <Input {...register("categoryName", { required: true })} />
+          {/* Category Name */}
+          <div className="flex">
+            <Label className="w-50">Category Name</Label>
+            <Input
+              {...register("categoryName", {
+                required: "Category name is required",
+              })}
+            />
           </div>
-          
-          <div className="flex gap-4">
-            <Label className="w-40">
-              Status
-            </Label>
-          
+
+          {/* Status */}
+          <div className="flex">
+            <Label className="w-50">Status</Label>
+
             <Controller
               name="status"
               control={control}
               render={({ field }) => (
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger className="w-full">
-                    <SelectValue />
+                    <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
+                    <SelectItem value="active">
+                      {" "}
+                      <span className="h-2.5 w-2.5 rounded-full bg-green-500" />
+                      Active
+                    </SelectItem>
+                    <SelectItem value="inactive">
+                      {" "}
+                      <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
+                      Inactive
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               )}
             />
           </div>
 
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setIsOpen(false)}>
+          {/* Actions */}
+          <div className="flex justify-end gap-2 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsOpen(false)}
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={createMutation.isPending}>
-              {createMutation.isPending ? "Saving..." : "Save"}
+
+            <Button type="submit" disabled={isSubmitting}>
+              {mode === "edit" ? "Save Changes" : "Save"}
             </Button>
           </div>
         </form>
