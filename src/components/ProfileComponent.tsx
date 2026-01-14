@@ -13,7 +13,7 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({
   const { user, logout } = useAuth();
   const [profileOpen, setProfileOpen] = useState(false);
 
-  /* Auto-close profile menu when sidebar collapses */
+  /* Close dropdown when sidebar collapses */
   useEffect(() => {
     if (collapsed) setProfileOpen(false);
   }, [collapsed]);
@@ -30,89 +30,108 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({
     }
     setProfileOpen((v) => !v);
   };
+
   return (
     <div className="relative border-t border-gray-200 px-3 py-2">
       {/* PROFILE BUTTON */}
       <button
         onClick={handleClick}
         className={`
-    w-full flex items-center
-    ${collapsed ? "justify-center" : "gap-3"}
-    rounded-lg p-2
-    transition-all duration-200
-    hover:bg-gray-100
-    active:scale-[0.98]
-  `}
+          w-full flex items-center
+          rounded-xl p-2
+          transition-colors duration-200
+          hover:bg-gray-100
+          active:scale-[0.98]
+          ${collapsed ? "justify-center" : "gap-3"}
+        `}
       >
-        {/* AVATAR */}
+        {/* AVATAR — fixed size, always visible */}
         <div
-          className={`
-      flex-shrink-0
-      rounded-full
-      bg-gradient-to-br from-blue-600 to-blue-700
-      text-white
-      flex items-center justify-center
-      font-semibold
-      shadow-sm
-      transition-all duration-300 ease-in-out
-      ${collapsed ? "w-10 h-10 text-sm" : "w-9 h-9 text-xs"}
-    `}
+          className="
+            w-10 h-10 flex-shrink-0
+            rounded-full
+            bg-gradient-to-br from-blue-600 to-blue-700
+            text-white
+            flex items-center justify-center
+            font-semibold text-sm
+            shadow-sm
+          "
         >
           {initials}
         </div>
 
-        {!collapsed && (
-          <div className="flex-1 text-left leading-tight">
-            <div className="text-sm font-semibold text-gray-900 truncate">
-              {fullName}
-            </div>
-            <div className="text-xs text-gray-500 capitalize">{user.role}</div>
+        {/* NAME + ROLE */}
+        <div
+          className={`
+            flex-1 overflow-hidden text-left leading-tight
+            transition-all duration-300 ease-out
+            ${
+              collapsed
+                ? "opacity-0 translate-x-[-6px] max-w-0"
+                : "opacity-100 translate-x-0 max-w-[180px] delay-200"
+            }
+          `}
+        >
+          <div className="text-sm font-semibold text-gray-900 truncate">
+            {fullName}
           </div>
-        )}
+          <div className="text-xs text-gray-500 capitalize">
+            {user.role}
+          </div>
+        </div>
 
-        {!collapsed && (
-          <svg
-            className={`w-4 h-4 text-gray-400 transition-transform ${
-              profileOpen ? "rotate-180" : ""
-            }`}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            viewBox="0 0 24 24"
-          >
-            <path d="M19 9l-7 7-7-7" />
-          </svg>
-        )}
+        {/* CHEVRON */}
+        <svg
+          className={`
+            w-4 h-4 text-gray-400
+            transition-all duration-300 ease-out
+            ${
+              collapsed
+                ? "opacity-0 translate-x-[-4px]"
+                : "opacity-100 translate-x-0 delay-200"
+            }
+            ${profileOpen ? "rotate-180" : ""}
+          `}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          viewBox="0 0 24 24"
+        >
+          <path d="M19 9l-7 7-7-7" />
+        </svg>
       </button>
 
       {/* PROFILE DROPDOWN */}
       <div
         className={`
-    absolute bottom-16 left-3 right-3
-    bg-white rounded-xl
-    shadow-xl
-    border border-gray-200
-    p-4 space-y-4
-    z-50
-    transform transition-all duration-400 ease-in-out
-    ${
-      !collapsed && profileOpen
-        ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
-        : "opacity-0 translate-y-2 scale-95 pointer-events-none"
-    }
-  `}
+          absolute bottom-16 left-3 right-3
+          bg-white rounded-xl
+          shadow-2xl
+          border border-gray-200
+          p-4 space-y-4
+          z-50
+          transition-all duration-300 ease-out
+          ${
+            !collapsed && profileOpen
+              ? "opacity-100 translate-y-0 pointer-events-auto"
+              : "opacity-0 translate-y-2 pointer-events-none"
+          }
+        `}
       >
         {/* USER INFO */}
         <div className="space-y-1">
-          <div className="text-sm font-semibold text-gray-900">{fullName}</div>
-
-          <div className="text-xs text-gray-500">{user.personnelId}</div>
-
-          <div className="text-xs text-gray-500">{user.designationName}</div>
-
-          <div className="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-medium text-blue-700 w-fit">
-            {user.role}
+          <div className="text-sm font-semibold text-gray-900">
+            {fullName}
           </div>
+          <div className="text-xs text-gray-500">
+            {user.personnelId}
+          </div>
+          <div className="text-xs text-gray-500">
+            {user.designationName}
+          </div>
+          <span className="inline-flex rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-medium text-blue-700">
+            {user.role}
+          </span>
         </div>
 
         {/* ACTIONS */}
@@ -133,22 +152,6 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({
           </button>
         </div>
       </div>
-
-      {/* OPTIONAL ANIMATION */}
-      <style>
-        {`
-          @keyframes fadeIn {
-            from {
-              opacity: 0;
-              transform: translateY(6px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-        `}
-      </style>
     </div>
   );
 };
