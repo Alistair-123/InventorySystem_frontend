@@ -230,6 +230,10 @@ function Sidebar() {
           );
         })}
       </nav>
+      <ProfileComponent
+  collapsed={collapsed}
+  onExpandSidebar={() => setCollapsed(false)}
+/>
     </aside>
   );
 }
