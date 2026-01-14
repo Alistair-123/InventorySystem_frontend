@@ -58,7 +58,7 @@ function Brand() {
       <Modal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
-        title="Create Brand"
+        title="Create Category"
         className="max-w-none font-poppins"
       >
         <div className="space-y-5 p-8">
