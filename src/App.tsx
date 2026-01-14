@@ -24,7 +24,7 @@ import PropertiesPerItem from './pages/properties per item/PropertiesPerItem'
 
 function App() {
   return (
-      <BrowserRouter>
+     
         <Routes>
           {/* Public route */}
           <Route path="/" element={<LoadPage />} />
@@ -57,7 +57,7 @@ function App() {
             <Route path="/reports/properties-per-personnel" element={<PropertiesPerPersonnel />} />
           </Route>
         </Routes>
-      </BrowserRouter>
+  
    
   )
 }
