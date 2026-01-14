@@ -51,13 +51,19 @@ function LogInPage() {
       ${success ? "opacity-0" : "opacity-100"}`}
       style={{ fontFamily: "'Inter', sans-serif" }}
     >
-      <div
-        className="absolute inset-0 bg-no-repeat bg-center opacity-10 grayscale"
-        style={{
-          backgroundImage: `url(${BgImage})`,
-          backgroundSize: "800px",
-        }}
-      />
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+  <img
+    src={BgImage}
+    alt=""
+    className="
+      w-[800px]
+      opacity-10
+      grayscale
+      animate-[slowSpin_100s_linear_infinite]
+    "
+  />
+</div>
+
 
       <img
         src={top}
@@ -154,6 +160,25 @@ function LogInPage() {
             from { opacity: 0; transform: translateY(20px) }
             to { opacity: 1; transform: translateY(0) }
           }
+
+          @keyframes fadeIn {
+      from { opacity: 0 }
+      to { opacity: 1 }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px) }
+      to { opacity: 1; transform: translateY(0) }
+    }
+
+    @keyframes slowSpin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
         `}
       </style>
     </div>

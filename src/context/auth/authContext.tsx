@@ -1,4 +1,5 @@
 import { createContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import type {
   AuthContextType,
@@ -18,6 +19,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const navigate = useNavigate();
   const login = async (data: LoginPayload) => {
     setLoading(true);
     try {
@@ -33,6 +35,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     await authService.logout();
     setUser(null);
     setAccessToken(null);
+    navigate('/login');
   };
 
   return (
