@@ -11,9 +11,7 @@ import MasterDataIcon from "../assets/icons/icons_masterdata.svg";
 import TransactionsIcon from "../assets/icons/icons_inventorymanagement.svg";
 import AdjustmentsIcon from "../assets/icons/icons_adjust.svg";
 import ReportsIcon from "../assets/icons/icons_reports.svg";
-import { LuAperture } from "react-icons/lu";
 import ProfileComponent from "./ProfileComponent";
-
 type SidebarItem = {
   label: string;
   url: string;

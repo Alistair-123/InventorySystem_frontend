@@ -381,6 +381,40 @@ function Category() {
           </div>
         </form>
       </Modal>
+
+       <ConfirmAction
+  open={confirmOpen}
+  type={confirmType}
+  title={confirmType === "delete" ? "Confirm Deletion" : "Confirm Changes"}
+  description={
+    confirmType === "delete" ? (
+      <>
+        Are you sure you want to delete{" "}
+        <span className="font-semibold text-red-500">
+          {selectedCategory?.categoryName}
+        </span>
+        ? This action cannot be undone.
+      </>
+    ) : (
+      <>
+        Are you sure you want to save changes to{" "}
+        <span className="font-semibold">
+          {selectedCategory?.categoryName}
+        </span>
+        ?
+      </>
+    )
+  }
+  confirmText={confirmType === "delete" ? "Delete" : "Confirm"}
+  isLoading={isProcessing}
+  onConfirm={confirmType === "delete" ? handleConfirm : confirmEdit}
+  onCancel={() => {
+    setConfirmOpen(false);
+    setSelectedCategory(null);
+  }}
+/>
+       
+
     </div>
   );
 }
