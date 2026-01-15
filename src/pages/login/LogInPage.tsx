@@ -19,7 +19,7 @@ function LogInPage() {
   const { login, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [success, setSuccess] = useState(false);
-  const [offset, setOffset] = useState({ x: 20, y: 20 });
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
 
   const buttonRef = useRef<HTMLDivElement>(null);
 
@@ -74,7 +74,7 @@ const handleMouseMove = (e: React.MouseEvent) => {
 
   const distance = Math.sqrt(dx * dx + dy * dy);
 
-  const dangerRadius = 120; // distance before escape
+  const dangerRadius = 200; // distance before escape
 
   if (distance < dangerRadius) {
     const angle = Math.atan2(dy, dx);
@@ -102,7 +102,6 @@ const handleMouseMove = (e: React.MouseEvent) => {
       w-[800px]
       opacity-10
       grayscale
-     
     "
   />
 </div>
@@ -184,7 +183,6 @@ const handleMouseMove = (e: React.MouseEvent) => {
                   type="submit"
                   label={isSubmitting || authLoading ? "Logging in..." : "Login"}
                   variant="primary"
-                  disabled={isSubmitting || authLoading}
                   style={{
                     transform: `translate(${offset.x}px, ${offset.y}px)`,
                     transition: "transform 0.12s ease-out",
