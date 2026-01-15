@@ -174,7 +174,7 @@ function Units() {
   return (
     <div className="font-poppins">
       <Dashboardheader title="Unit Management" />
-      <div className="flex items-center justify-between p-4">
+      <div className="flex items-center justify-between p-8">
         <Input
           type="text"
           placeholder="Search Units..."
