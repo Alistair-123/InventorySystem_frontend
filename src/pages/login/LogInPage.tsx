@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import top from "../../assets/Top.png";
 import ground from "../../assets/Ground.png";
 import BgImage from "../../assets/logos.png";
@@ -19,6 +19,9 @@ function LogInPage() {
   const { login, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [success, setSuccess] = useState(false);
+  const [offset, setOffset] = useState({ x: 20, y: 20 });
+
+  const buttonRef = useRef<HTMLDivElement>(null);
 
   const {
     register,
@@ -34,7 +37,7 @@ function LogInPage() {
     try {
       await login(data);
       setSuccess(true);
-      setTimeout(() => navigate("/dashboard"), 900);
+      navigate("/dashboard");
     } catch {
       setError("root", {
         type: "credentials",
@@ -43,6 +46,46 @@ function LogInPage() {
       setFocus("personnelId");
     }
   };
+
+  
+
+  const moveButton = () => {
+  const x = Math.random() * 120 - 60; // -60 to +60
+  const y = Math.random() * 60 - 30;  // -30 to +30
+
+  setOffset({ x, y });
+};
+
+const resetButton = () => {
+  setOffset({ x: 0, y: 0 });
+};
+
+
+const handleMouseMove = (e: React.MouseEvent) => {
+  if (!buttonRef.current) return;
+
+  const rect = buttonRef.current.getBoundingClientRect();
+
+  const btnCenterX = rect.left + rect.width / 2;
+  const btnCenterY = rect.top + rect.height / 2;
+
+  const dx = e.clientX - btnCenterX;
+  const dy = e.clientY - btnCenterY;
+
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  const dangerRadius = 120; // distance before escape
+
+  if (distance < dangerRadius) {
+    const angle = Math.atan2(dy, dx);
+
+    setOffset({
+      x: -Math.cos(angle) * 300,
+      y: -Math.sin(angle) * 300,
+    });
+  }
+};
+
 
   return (
     <div
@@ -59,12 +102,10 @@ function LogInPage() {
       w-[800px]
       opacity-10
       grayscale
-      animate-[slowSpin_100s_linear_infinite]
+     
     "
   />
 </div>
-
-
       <img
         src={top}
         alt=""
@@ -78,10 +119,10 @@ function LogInPage() {
       />
 
       <div className="relative z-10 flex w-full max-w-6xl px-6 md:px-10 animate-[fadeIn_0.8s_ease]">
-        <div className="hidden md:flex flex-1 flex-col items-center justify-center">
-          <img src={DICT} alt="DICT Logo" className="max-w-sm mb-10" />
+        <div className="hidden md:flex flex-1 flex-col items-start justify-center">
+          <img src={DICT} alt="DICT Logo" className="max-w-[250px] mb-10" />
 
-          <div className="text-center leading-[0.9]">
+          <div className="text-start leading-[0.9]">
             <div
               className="text-7xl font-extrabold tracking-tight"
               style={{ color: "rgba(19, 73, 145, 1)" }}
@@ -138,12 +179,20 @@ function LogInPage() {
                 onFocus={() => clearErrors("root")}
               />
 
-              <Button
-                type="submit"
-                label={isSubmitting || authLoading ? "Logging in..." : "Login"}
-                variant="secondary"
-                disabled={isSubmitting || authLoading}
-              />
+             <div ref={buttonRef} onMouseMove={handleMouseMove}>
+                <Button
+                  type="submit"
+                  label={isSubmitting || authLoading ? "Logging in..." : "Login"}
+                  variant="primary"
+                  disabled={isSubmitting || authLoading}
+                  style={{
+                    transform: `translate(${offset.x}px, ${offset.y}px)`,
+                    transition: "transform 0.12s ease-out",
+                    width: 'full'
+                  }}
+                />
+              </div>
+
             </form>
           </Card>
         </div>
