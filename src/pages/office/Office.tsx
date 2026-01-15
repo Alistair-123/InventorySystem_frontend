@@ -173,7 +173,7 @@ function Offices() {
   return (
     <div className='font-poppins'>
       <Dashboardheader title="Office Management" />
-      <div className='flex items-center justify-between p-4'>
+      <div className='flex items-center justify-between p-8'>
         <Input type="text" placeholder="Search Offices..." className="w-[300px] font-poppins"  onChange={(e) => {
             setSearch(e.target.value);
             setPage(1); // reset pagination on new search
