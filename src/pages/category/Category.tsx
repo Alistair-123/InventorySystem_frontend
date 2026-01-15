@@ -50,8 +50,9 @@ function Category() {
   const [confirmType, setConfirmType] = useState<"delete" | "edit">("delete");
   const [isProcessing, setIsProcessing] = useState(false);
   const [mode, setMode] = useState<"create" | "edit">("create");
-  const [pendingEditData, setPendingEditData] =
-  useState<CreateCategory | null>(null);
+  const [pendingEditData, setPendingEditData] = useState<CreateCategory | null>(
+    null
+  );
 
   const fetchData = useCallback(async () => {
     try {
@@ -96,33 +97,32 @@ function Category() {
     },
   });
 
- const onSubmit = async (data: CreateCategory) => {
-  if (mode === "edit") {
-    setPendingEditData(data);   // ✅ store snapshot
-    setConfirmType("edit");
-    setConfirmOpen(true);
-    return;
-  }
+  const onSubmit = async (data: CreateCategory) => {
+    if (mode === "edit") {
+      setPendingEditData(data);
+      setConfirmType("edit");
+      setConfirmOpen(true);
+      return;
+    }
 
-  await axiosInstance.post("/category/createcategory", data);
-  reset();
-  setIsOpen(false);
-  fetchData();
-};
- 
+    await axiosInstance.post("/category/createcategory", data);
+    reset();
+    setIsOpen(false);
+    fetchData();
+  };
+
   const handleEdit = (category: GetCategory) => {
-  setMode("edit");
-  setSelectedCategory(category);
+    setMode("edit");
+    setSelectedCategory(category);
 
-  reset({
-    categoryId: category.categoryId,
-    categoryName: category.categoryName,
-    status: category.status,
-  });
+    reset({
+      categoryId: category.categoryId,
+      categoryName: category.categoryName,
+      status: category.status,
+    });
 
-  setIsOpen(true);
-};
-
+    setIsOpen(true);
+  };
 
   const handleDeleteClick = (category: GetCategory) => {
     setSelectedCategory(category);
@@ -152,30 +152,29 @@ function Category() {
     }
   };
 
- const confirmEdit = async () => {
-  if (!selectedCategory || !pendingEditData) return;
+  const confirmEdit = async () => {
+    if (!selectedCategory || !pendingEditData) return;
 
-  try {
-    setIsProcessing(true);
+    try {
+      setIsProcessing(true);
 
-    await axiosInstance.put(
-      `/category/updatecategory/${selectedCategory._id}`,
-      pendingEditData
-    );
+      await axiosInstance.put(
+        `/category/updatecategory/${selectedCategory._id}`,
+        pendingEditData
+      );
 
-    setConfirmOpen(false);
-    setIsOpen(false);
-    setPendingEditData(null);
-    setSelectedCategory(null);
-    reset();
-    setMode("create");
+      setConfirmOpen(false);
+      setIsOpen(false);
+      setPendingEditData(null);
+      setSelectedCategory(null);
+      reset();
+      setMode("create");
 
-    fetchData();
-  } finally {
-    setIsProcessing(false);
-  }
-};
-
+      fetchData();
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   return (
     <div className="font-poppins">
@@ -197,7 +196,7 @@ function Category() {
 
       <div className="p-8">
         <Table className="p-4">
-          <TableCaption>List of Brands</TableCaption>
+          <TableCaption>List of Categories</TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead>#</TableHead>
@@ -232,7 +231,7 @@ function Category() {
             {/* 3. Empty */}
             {!isLoading && !isError && categories.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="text-center">
+                <TableCell colSpan={5} className="text-center text-red-400">
                   No categories found
                 </TableCell>
               </TableRow>
@@ -382,39 +381,39 @@ function Category() {
         </form>
       </Modal>
 
-       <ConfirmAction
-  open={confirmOpen}
-  type={confirmType}
-  title={confirmType === "delete" ? "Confirm Deletion" : "Confirm Changes"}
-  description={
-    confirmType === "delete" ? (
-      <>
-        Are you sure you want to delete{" "}
-        <span className="font-semibold text-red-500">
-          {selectedCategory?.categoryName}
-        </span>
-        ? This action cannot be undone.
-      </>
-    ) : (
-      <>
-        Are you sure you want to save changes to{" "}
-        <span className="font-semibold">
-          {selectedCategory?.categoryName}
-        </span>
-        ?
-      </>
-    )
-  }
-  confirmText={confirmType === "delete" ? "Delete" : "Confirm"}
-  isLoading={isProcessing}
-  onConfirm={confirmType === "delete" ? handleConfirm : confirmEdit}
-  onCancel={() => {
-    setConfirmOpen(false);
-    setSelectedCategory(null);
-  }}
-/>
-       
-
+      <ConfirmAction
+        open={confirmOpen}
+        type={confirmType}
+        title={
+          confirmType === "delete" ? "Confirm Deletion" : "Confirm Changes"
+        }
+        description={
+          confirmType === "delete" ? (
+            <>
+              Are you sure you want to delete{" "}
+              <span className="font-semibold text-red-500">
+                {selectedCategory?.categoryName}
+              </span>
+              ? This action cannot be undone.
+            </>
+          ) : (
+            <>
+              Are you sure you want to save changes to{" "}
+              <span className="font-semibold">
+                {selectedCategory?.categoryName}
+              </span>
+              ?
+            </>
+          )
+        }
+        confirmText={confirmType === "delete" ? "Delete" : "Confirm"}
+        isLoading={isProcessing}
+        onConfirm={confirmType === "delete" ? handleConfirm : confirmEdit}
+        onCancel={() => {
+          setConfirmOpen(false);
+          setSelectedCategory(null);
+        }}
+      />
     </div>
   );
 }
