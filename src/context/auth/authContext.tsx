@@ -1,4 +1,8 @@
-import { createContext, useState } from 'react';
+import {
+  createContext,
+  useEffect,
+  useState,
+} from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import type {
@@ -16,31 +20,50 @@ type AuthProviderProps = {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<Personnel | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  /**
+   * 🔑 AUTH REHYDRATION (RUNS ON REFRESH)
+   */
+  useEffect(() => {
+    const bootstrapAuth = async () => {
+      try {
+        const personnel = await authService.authCheck();
+        setUser(personnel);
+      } catch {
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    bootstrapAuth();
+  }, []);
+
   const login = async (data: LoginPayload) => {
     setLoading(true);
     try {
       const res = await authService.login(data);
       setUser(res.personnel);
-      setAccessToken(res.accessToken);
+      navigate('/', { replace: true });
     } finally {
       setLoading(false);
     }
   };
 
   const logout = async () => {
-    await authService.logout();
-    setUser(null);
-    setAccessToken(null);
-    navigate('/login');
+    try {
+      await authService.logout();
+    } finally {
+      setUser(null);
+      navigate('/login', { replace: true });
+    }
   };
 
   return (
     <AuthContext.Provider
-      value={{ user, accessToken, loading, login, logout }}
+      value={{ user, loading, login, logout }}
     >
       {children}
     </AuthContext.Provider>

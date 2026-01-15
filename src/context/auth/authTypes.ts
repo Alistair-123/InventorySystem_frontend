@@ -9,11 +9,6 @@ export type Personnel = {
   role: Role;
 };
 
-export type AuthResponse = {
-  accessToken: string;
-  personnel: Personnel;
-};
-
 export type LoginPayload = {
   personnelId: string;
   password: string;
@@ -21,7 +16,6 @@ export type LoginPayload = {
 
 export type AuthContextType = {
   user: Personnel | null;
-  accessToken: string | null;
   loading: boolean;
   login: (data: LoginPayload) => Promise<void>;
   logout: () => Promise<void>;
