@@ -173,7 +173,7 @@ function Acquisitions() {
   return (
     <div className='font-poppins'>
       <Dashboardheader title="Acquisition Management" />
-      <div className='flex items-center justify-between p-4'>
+      <div className='flex items-center justify-between p-8'>
         <Input type="text" placeholder="Search Acquisition..." className="w-[300px] font-poppins"  onChange={(e) => {
             setSearch(e.target.value);
             setPage(1); // reset pagination on new search
