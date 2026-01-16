@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useAuth } from "../context/UseAuth";
 
 type ProfileComponentProps = {
@@ -12,30 +12,54 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({
 }) => {
   const { user, logout } = useAuth();
   const [profileOpen, setProfileOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   /* Close dropdown when sidebar collapses */
   useEffect(() => {
     if (collapsed) setProfileOpen(false);
   }, [collapsed]);
 
+  /* Close dropdown on click outside */
+  useEffect(() => {
+    if (!profileOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setProfileOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [profileOpen]);
+
   if (!user) return null;
 
   const fullName = `${user.firstName} ${user.lastName}`;
   const initials = `${user.firstName[0]}${user.lastName[0]}`;
 
-  const handleClick = () => {
+  const handleProfileClick = () => {
     if (collapsed) {
       onExpandSidebar?.();
       return;
     }
-    setProfileOpen((v) => !v);
+    setProfileOpen((prev) => !prev);
   };
 
   return (
-    <div className="relative border-t border-gray-200 px-3 py-2">
+    <div
+      ref={containerRef}
+      className="relative border-t border-gray-200 px-3 py-2"
+    >
       {/* PROFILE BUTTON */}
       <button
-        onClick={handleClick}
+        onClick={handleProfileClick}
         className={`
           w-full flex items-center
           rounded-xl p-2
@@ -45,7 +69,7 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({
           ${collapsed ? "justify-center" : "gap-3"}
         `}
       >
-        {/* AVATAR — fixed size, always visible */}
+        {/* AVATAR */}
         <div
           className="
             w-10 h-10 flex-shrink-0
