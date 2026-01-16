@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/UseAuth";
 import { FiUser, FiShield, FiLogOut } from "react-icons/fi";
 
@@ -14,6 +15,8 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({
   const { user, logout } = useAuth();
   const [profileOpen, setProfileOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   /* Close dropdown when sidebar collapses */
   useEffect(() => {
@@ -51,6 +54,12 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({
     setProfileOpen((prev) => !prev);
   };
 
+  // Modal-like navigation: change URL but stay on same page
+  const openModalRoute = (path: string) => {
+    navigate(path, { state: { background: location } }); // mark current page as background
+    setProfileOpen(false); // close dropdown
+  };
+
   return (
     <div
       ref={containerRef}
@@ -60,40 +69,35 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({
       <button
         onClick={handleProfileClick}
         className={`
-          w-full flex items-center rounded-lg p-2
-          hover:bg-gray-100 transition
+          w-full flex items-center rounded-lg px-2 py-2
+          hover:bg-gray-100 transition-all duration-150
+          active:scale-[0.97]
           ${collapsed ? "justify-center" : "gap-2"}
         `}
       >
         {/* AVATAR */}
-        <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-semibold">
+        <div className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-semibold">
           {initials}
         </div>
 
-        {/* NAME + ROLE (LEFT-ALIGNED FIX) */}
+        {/* NAME + ROLE */}
         <div
           className={`
             flex-1 min-w-0 leading-tight text-left
             transition-all duration-300
-            ${
-              collapsed
-                ? "opacity-0 max-w-0"
-                : "opacity-100 max-w-[160px]"
-            }
+            ${collapsed ? "opacity-0 max-w-0" : "opacity-100 max-w-[160px]"}
           `}
         >
           <div className="text-sm font-medium text-gray-900 truncate">
             {fullName}
           </div>
-          <div className="text-xs text-gray-500 truncate">
-            {user.role}
-          </div>
+          <div className="text-xs text-gray-500 truncate">{user.role}</div>
         </div>
 
         {/* CHEVRON */}
         {!collapsed && (
           <svg
-            className={`w-4 h-4 text-gray-400 transition-transform ${
+            className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
               profileOpen ? "rotate-180" : ""
             }`}
             fill="none"
@@ -106,61 +110,61 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({
         )}
       </button>
 
-      {/* DROPDOWN */}
+      {/* DROPDOWN — modal style */}
       <div
         className={`
-          absolute bottom-20 left-3 right-3
+          absolute bottom-20 right-0 w-60
           bg-white rounded-md border border-gray-200
-          shadow-md z-50 text-sm
+          shadow-lg z-50 text-sm
           transition-all duration-200
-          ${
-            profileOpen && !collapsed
-              ? "opacity-100 translate-y-0 pointer-events-auto"
-              : "opacity-0 translate-y-1 pointer-events-none"
-          }
+          ${profileOpen && !collapsed ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-1 pointer-events-none"}
         `}
       >
         {/* USER INFO */}
-        <div className="flex items-center gap-2 p-2">
-          <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-semibold">
+        <div className="flex items-center gap-3 px-3 py-2">
+          <div className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-semibold">
             {initials}
           </div>
 
           <div className="min-w-0 leading-tight text-left">
-            <div className="font-medium text-gray-900 truncate">
+            <div className="font-medium text-gray-900 truncate text-sm">
               {fullName}
             </div>
             <div className="text-xs text-gray-500 truncate">
               @{user.username ?? user.personnelId}
             </div>
-            <div className="text-xs text-gray-400">
-              {user.role}
-            </div>
+            <div className="text-xs text-gray-400">{user.role}</div>
           </div>
         </div>
 
-        <div className="border-t border-gray-200" />
+        <div className="border-t border-gray-200 my-1" />
 
-        {/* ACTIONS */}
-        <div className="p-1 space-y-0.5">
-          <button className="w-full flex items-center gap-2 px-2 py-1 rounded-md hover:bg-gray-100 transition">
+        {/* ACCOUNT & ADMIN — modal route buttons */}
+        <div className="space-y-0.5 px-1">
+          <button
+            onClick={() => openModalRoute("/account")}
+            className="w-full flex items-center gap-2 px-2 py-1 rounded-md transition-all duration-150 hover:bg-gray-100 active:scale-[0.97]"
+          >
             <FiUser size={16} className="text-gray-500" />
             Account
           </button>
 
-          <button className="w-full flex items-center gap-2 px-2 py-1 rounded-md hover:bg-gray-100 transition">
+          <button
+            onClick={() => openModalRoute("/admin")}
+            className="w-full flex items-center gap-2 px-2 py-1 rounded-md transition-all duration-150 hover:bg-gray-100 active:scale-[0.97]"
+          >
             <FiShield size={16} className="text-gray-500" />
             Admin
           </button>
         </div>
 
-        <div className="border-t border-gray-200" />
+        <div className="border-t border-gray-200 my-1" />
 
         {/* LOGOUT */}
-        <div className="p-1">
+        <div className="px-1 py-1">
           <button
             onClick={logout}
-            className="w-full flex items-center gap-2 px-2 py-1 rounded-md text-red-600 hover:bg-red-50 transition"
+            className="w-full flex items-center gap-2 px-2 py-1 rounded-md text-red-600 hover:bg-red-50 transition-all duration-150 active:scale-[0.97]"
           >
             <FiLogOut size={16} />
             Logout

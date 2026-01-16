@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { sidebarData } from "./Data";
-import { masterdataConfig, transactionsConfig, reportsConfig } from "./sidebarData"; // <-- added reportsConfig
+import { masterdataConfig, transactionsConfig, reportsConfig } from "./sidebarData";
 
 import DictLongLogo from "../assets/DictLongLogo.png";
 import SmallLogo from "../assets/logos.png";
@@ -12,10 +12,8 @@ import TransactionsIcon from "../assets/icons/icons_inventorymanagement.svg";
 import AdjustmentsIcon from "../assets/icons/icons_adjust.svg";
 import ReportsIcon from "../assets/icons/icons_reports.svg";
 import ProfileComponent from "./ProfileComponent";
-type SidebarItem = {
-  label: string;
-  url: string;
-};
+
+type SidebarItem = { label: string; url: string };
 
 const iconMap: Record<string, string> = {
   Dashboard: DashboardIcon,
@@ -33,14 +31,21 @@ function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
 
+  const getSectionChildren = (sectionLabel: string): SidebarItem[] => {
+    if (sectionLabel === "Master Data") return Object.values(masterdataConfig);
+    if (sectionLabel === "Transactions") return Object.values(transactionsConfig);
+    if (sectionLabel === "Reports") return Object.values(reportsConfig);
+    return [];
+  };
+
   const isChildActive = (items: SidebarItem[]) =>
     items.some((item) => location.pathname === item.url);
 
   useEffect(() => {
     const next: Record<string, boolean> = {};
     Object.entries(sidebarData).forEach(([key, section]) => {
-      const items = Object.values(section.items) as SidebarItem[];
-      next[key] = items.length > 1 && isChildActive(items);
+      const children = getSectionChildren(section.label);
+      next[key] = children.length > 0 && isChildActive(children);
     });
     setOpenSections(next);
   }, [location.pathname]);
@@ -52,8 +57,7 @@ function Sidebar() {
         setCollapsed(false);
         return { [key]: true };
       }
-      if (isCurrentlyOpen) return {};
-      return { [key]: true };
+      return { ...prev, [key]: !isCurrentlyOpen };
     });
   };
 
@@ -83,16 +87,15 @@ function Sidebar() {
 
       {/* NAV */}
       <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
-      
         {Object.entries(sidebarData).map(([key, section]) => {
-          const items = Object.values(section.items) as SidebarItem[];
+          const children = getSectionChildren(section.label);
           const iconSrc = iconMap[section.label];
-          const isAccordion = items.length > 1;
+          const isAccordion = children.length > 0;
           const isOpen = openSections[key];
 
           /* SINGLE ITEM */
           if (!isAccordion) {
-            const item = items[0];
+            const item = Object.values(section.items)[0] as SidebarItem;
             return (
               <NavLink
                 key={item.url}
@@ -145,95 +148,34 @@ function Sidebar() {
                 }`}
               >
                 <ul className="mt-1 ml-6 border-l border-gray-200 pl-3 space-y-1">
-                  {section.label === "Master Data"
-                    ? Object.values(masterdataConfig).map((item) => {
-                        const Icon = item.icon;
-                        return (
-                          <NavLink
-                            key={item.url}
-                            to={item.url}
-                            end
-                            className={({ isActive }) =>
-                              `${baseNav} ${
-                                isActive
-                                  ? "bg-blue-50 text-blue-700 font-medium"
-                                  : "text-gray-600 hover:bg-gray-50 hover:translate-x-1"
-                              }`
-                            }
-                          >
-                            {Icon && <Icon size={16} className="opacity-80 mr-2" />}
-                            {!collapsed && item.label}
-                          </NavLink>
-                        );
-                      })
-                    : section.label === "Transactions"
-                    ? Object.values(transactionsConfig).map((item) => {
-                        const Icon = item.icon;
-                        return (
-                          <NavLink
-                            key={item.url}
-                            to={item.url}
-                            end
-                            className={({ isActive }) =>
-                              `${baseNav} ${
-                                isActive
-                                  ? "bg-blue-50 text-blue-700 font-medium"
-                                  : "text-gray-600 hover:bg-gray-50 hover:translate-x-1"
-                              }`
-                            }
-                          >
-                            {Icon && <Icon size={16} className="opacity-80 mr-2" />}
-                            {!collapsed && item.label}
-                          </NavLink>
-                        );
-                      })
-                    : section.label === "Reports"
-                    ? Object.values(reportsConfig).map((item) => {
-                        const Icon = item.icon;
-                        return (
-                          <NavLink
-                            key={item.url}
-                            to={item.url}
-                            end
-                            className={({ isActive }) =>
-                              `${baseNav} ${
-                                isActive
-                                  ? "bg-blue-50 text-blue-700 font-medium"
-                                  : "text-gray-600 hover:bg-gray-50 hover:translate-x-1"
-                              }`
-                            }
-                          >
-                            {Icon && <Icon size={16} className="opacity-80 mr-2" />}
-                            {!collapsed && item.label}
-                          </NavLink>
-                        );
-                      })
-                    : items.map((item) => (
-                        <NavLink
-                          key={item.url}
-                          to={item.url}
-                          end
-                          className={({ isActive }) =>
-                            `${baseNav} ${
-                              isActive
-                                ? "bg-blue-50 text-blue-700 font-medium"
-                                : "text-gray-600 hover:bg-gray-50 hover:translate-x-1"
-                            }`
-                          }
-                        >
-                          {!collapsed && item.label}
-                        </NavLink>
-                      ))}
+                  {children.map((item) => {
+                    const Icon = (item as any).icon; // if using react-icons
+                    return (
+                      <NavLink
+                        key={item.url}
+                        to={item.url}
+                        end
+                        className={({ isActive }) =>
+                          `${baseNav} ${
+                            isActive
+                              ? "bg-blue-50 text-blue-700 font-medium"
+                              : "text-gray-600 hover:bg-gray-50 hover:translate-x-1"
+                          }`
+                        }
+                      >
+                        {Icon && <Icon size={16} className="opacity-80 mr-2" />}
+                        {!collapsed && item.label}
+                      </NavLink>
+                    );
+                  })}
                 </ul>
               </div>
             </div>
           );
         })}
       </nav>
-      <ProfileComponent
-  collapsed={collapsed}
-  onExpandSidebar={() => setCollapsed(false)}
-/>
+
+      <ProfileComponent collapsed={collapsed} onExpandSidebar={() => setCollapsed(false)} />
     </aside>
   );
 }
