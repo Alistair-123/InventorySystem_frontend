@@ -84,8 +84,7 @@ function Acquisitions() {
               handleSubmit,
               control,
               reset,
-              getValues,
-              formState: { errors, isSubmitting },
+              formState: { isSubmitting },
             } = useForm<CreateAcquisition>({
               defaultValues: {
                 acquisitionTypeName: "",
@@ -295,15 +294,6 @@ function Acquisitions() {
         className="max-w-none font-poppins"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 p-8">
-          <div className="flex">
-            <Label className="w-50">Acquisition ID</Label>
-            <Input
-              {...register("acquisitionTypeId", {
-                required: "Acquisition ID is required",
-              })}
-            />
-          </div>
-
           <div className="flex">
             <Label className="w-50">Acquisition Name</Label>
             <Input
