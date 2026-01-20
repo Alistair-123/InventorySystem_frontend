@@ -88,7 +88,6 @@ function Acquisitions() {
               formState: { errors, isSubmitting },
             } = useForm<CreateAcquisition>({
               defaultValues: {
-                acquisitionTypeId: "",
                 acquisitionTypeName: "",
                 status: "active",
               },
@@ -113,7 +112,6 @@ function Acquisitions() {
               setSelectedAcquisition(acquisition);
           
               reset({
-                acquisitionTypeId: acquisition.acquisitionTypeId,
                 acquisitionTypeName: acquisition.acquisitionTypeName,
                 status: acquisition.status,
               });
