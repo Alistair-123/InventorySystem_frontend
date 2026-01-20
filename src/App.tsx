@@ -18,10 +18,11 @@ import PropertyStatus from "./pages/property status/PropertyStatus";
 import PropertiesPerPersonnel from "./pages/properties per personnel/PropertiesPerPersonnel";
 import PropertiesPerCategory from "./pages/properties per category/PropertiesPerCategory";
 import PropertiesPerItem from "./pages/properties per item/PropertiesPerItem";
+import AddPersonnel from "./pages/admin/AddPersonnel";
 
 // Modals
 import Account from "./pages/account/Account";
-import Admin from "./pages/admin/Admin";
+import Manage from "./pages/admin/ManageUsers";
 
 function AppWrapper() {
   const location = useLocation();
@@ -46,7 +47,7 @@ function AppWrapper() {
           <Route path="/items" element={<Items />} />
           <Route path="/properties" element={<Properties />} />
           <Route path="/adjustment-records" element={<AdjustmentRecords />} />
-
+          <Route path="/admin/add-personnel" element={<AddPersonnel onCancel={() => window.history.back()} />} />
           {/* Reports */}
           <Route path="/reports/inventory-summary" element={<InventorySummary />} />
           <Route path="/reports/property-status" element={<PropertyStatus />} />
@@ -65,7 +66,7 @@ function AppWrapper() {
           />
           <Route
             path="/admin/*"
-            element={<Admin onClose={() => window.history.back()} />}
+            element={<Manage onClose={() => window.history.back()} />}
           />
         </Routes>
       )}

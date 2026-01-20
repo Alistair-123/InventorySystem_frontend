@@ -91,7 +91,6 @@ function Category() {
     formState: { errors, isSubmitting },
   } = useForm<CreateCategory>({
     defaultValues: {
-      categoryId: "",
       categoryName: "",
       status: "active",
     },
@@ -116,7 +115,6 @@ function Category() {
     setSelectedCategory(category);
 
     reset({
-      categoryId: category.categoryId,
       categoryName: category.categoryName,
       status: category.status,
     });
@@ -316,14 +314,12 @@ function Category() {
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 p-8">
           {/* Category ID */}
-          <div className="flex">
-            <Label className="w-50">Category ID</Label>
-            <Input
-              {...register("categoryId", {
-                required: "Category ID is required",
-              })}
-            />
-          </div>
+          {mode === "edit" && selectedCategory && (
+            <div className="flex">
+              <Label className="w-50">Category ID</Label>
+              <Input value={selectedCategory.categoryId} disabled />
+            </div>
+          )}
 
           {/* Category Name */}
           <div className="flex">

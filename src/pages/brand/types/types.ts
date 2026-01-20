@@ -8,7 +8,6 @@ export interface GetBrand {
 }
 
 export interface CreateBrand {
-    brandId: string,
     brandName: string, 
     status: BrandStatus
 }
