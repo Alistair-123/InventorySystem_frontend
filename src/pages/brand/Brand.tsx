@@ -89,7 +89,6 @@ function Brand() {
     formState: { errors, isSubmitting },
   } = useForm<CreateBrand>({
     defaultValues: {
-      brandId: "",
       brandName: "",
       status: "active",
     },
@@ -114,7 +113,6 @@ function Brand() {
     setSelectedBrand(brand);
 
     reset({
-      brandId: brand.brandId,
       brandName: brand.brandName,
       status: brand.status,
     });
@@ -309,15 +307,6 @@ function Brand() {
         className="max-w-none font-poppins"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 p-8">
-          <div className="flex">
-            <Label className="w-50">Brand ID</Label>
-            <Input
-              {...register("brandId", {
-                required: "Brand ID is required",
-              })}
-            />
-          </div>
-
           <div className="flex">
             <Label className="w-50">Brand Name</Label>
             <Input

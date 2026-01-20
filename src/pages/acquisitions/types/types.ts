@@ -8,7 +8,6 @@ export interface GetAcquisition {
 }
 
 export interface CreateAcquisition {
-   acquisitionTypeId: string,
    acquisitionTypeName: string, 
     status: AcquisitionStatus
 }
