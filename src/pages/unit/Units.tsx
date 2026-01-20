@@ -84,8 +84,7 @@ function Units() {
     handleSubmit,
     control,
     reset,
-    getValues,
-    formState: { errors, isSubmitting },
+    formState: { isSubmitting },
   } = useForm<CreateUnit>({
     defaultValues: {
       unitId: "",
@@ -304,14 +303,14 @@ function Units() {
         className="max-w-none font-poppins"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 p-8">
-          <div className="flex">
+          {/* <div className="flex">
             <Label className="w-50">Unit ID</Label>
             <Input
               {...register("unitId", {
                 required: "Unit ID is required",
               })}
             />
-          </div>
+          </div> */}
 
           <div className="flex">
             <Label className="w-50">Unit Name</Label>

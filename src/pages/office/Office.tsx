@@ -84,8 +84,7 @@ function Offices() {
         handleSubmit,
         control,
         reset,
-        getValues,
-        formState: { errors, isSubmitting },
+        formState: { isSubmitting },
       } = useForm<CreateOffice>({
         defaultValues: {
           officeId: "",
@@ -297,15 +296,6 @@ function Offices() {
         className="max-w-none font-poppins"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 p-8">
-          <div className="flex">
-            <Label className="w-50">Office ID</Label>
-            <Input
-              {...register("officeId", {
-                required: "Office ID is required",
-              })}
-            />
-          </div>
-
           <div className="flex">
             <Label className="w-50">Office Name</Label>
             <Input
