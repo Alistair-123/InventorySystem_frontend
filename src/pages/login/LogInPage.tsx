@@ -94,17 +94,19 @@ const handleMouseMove = (e: React.MouseEvent) => {
       ${success ? "opacity-0" : "opacity-100"}`}
       style={{ fontFamily: "'Inter', sans-serif" }}
     >
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-  <img
-    src={BgImage}
-    alt=""
-    className="
-      w-[800px]
-      opacity-10
-      grayscale
-    "
-  />
-</div>
+    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+      <img
+        src={BgImage}
+        alt=""
+        className="
+        w-[800px]
+        opacity-10
+        grayscale
+        animate-[slowSpin_90s_linear_infinite]
+      "
+      />
+    </div>
+
       <img
         src={top}
         alt=""
@@ -119,9 +121,9 @@ const handleMouseMove = (e: React.MouseEvent) => {
 
       <div className="relative z-10 flex w-full max-w-6xl px-6 md:px-10 animate-[fadeIn_0.8s_ease]">
         <div className="hidden md:flex flex-1 flex-col items-start justify-center">
-          <img src={DICT} alt="DICT Logo" className="max-w-[250px] mb-10" />
+          <img src={DICT} alt="DICT Logo" className="max-w-[220px] mb-3" />
 
-          <div className="text-start leading-[0.9]">
+          <div className="text-start leading-[0.85] mt-1">
             <div
               className="text-7xl font-extrabold tracking-tight"
               style={{ color: "rgba(19, 73, 145, 1)" }}
@@ -178,16 +180,11 @@ const handleMouseMove = (e: React.MouseEvent) => {
                 onFocus={() => clearErrors("root")}
               />
 
-             <div ref={buttonRef} onMouseMove={handleMouseMove}>
+             <div className="flex justify-center items-center mt-2">
                 <Button
                   type="submit"
                   label={isSubmitting || authLoading ? "Logging in..." : "Login"}
                   variant="primary"
-                  style={{
-                    transform: `translate(${offset.x}px, ${offset.y}px)`,
-                    transition: "transform 0.12s ease-out",
-                    width: 'full'
-                  }}
                 />
               </div>
 
