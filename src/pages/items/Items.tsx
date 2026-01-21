@@ -1,9 +1,14 @@
 import Dashboardheader from "@/components/Dashboardheader";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { IoIosAddCircleOutline } from "react-icons/io";
+
+import axiosInstance from "@/utils/axiosInstance";
+import { fetchReferenceData } from "./api/fetchedData";
+
+import type { CategoryRef, BrandRef, UnitRef, MongoId } from "./types/types";
+
 import {
   Table,
   TableBody,
@@ -17,7 +22,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion"
+} from "@/components/ui/accordion";
 import Modal from "@/components/ui/modal";
 import { Label } from "@/components/ui/label";
 import {
@@ -31,6 +36,30 @@ import {
 function Item() {
   const [isOpen, setIsOpen] = useState(false);
   const [open, setOpen] = useState(false);
+  const [categories, setCategories] = useState<CategoryRef[]>([]);
+  const [brands, setBrands] = useState<BrandRef[]>([]);
+  const [units, setUnits] = useState<UnitRef[]>([]);
+
+  const [category, setCategory] = useState<MongoId>("");
+  const [brand, setBrand] = useState<MongoId>("");
+  const [unit, setUnit] = useState<MongoId>("");
+
+  useEffect(() => {
+    const loadReferenceData = async () => {
+      try {
+        const data = await fetchReferenceData();
+
+        setCategories(data.categories);
+        setBrands(data.brands);
+        setUnits(data.units);
+      } catch (error) {
+        console.error("Failed to load reference data", error);
+      }
+    };
+
+    loadReferenceData();
+  }, []);
+
   return (
     <div className="font-poppins">
       <Dashboardheader title="Item Management" />
@@ -38,7 +67,7 @@ function Item() {
         <Input
           type="text"
           placeholder="Search Items..."
-          className="w-[300px] font-poppins"
+          className="w-75 font-poppins"
         />
         <Button className="cursor-pointer" onClick={() => setIsOpen(true)}>
           Add Item
@@ -79,7 +108,11 @@ function Item() {
         title="Create Item"
         className="max-w-none font-poppins"
       >
-        <div className="p-8 space-y-6">
+        <div className="p-4 space-y-6">
+            <div className="grid grid-cols-[150px_1fr] items-center gap-4">
+              <Label>Item Image</Label>
+              <Input type="file" className="w-30 h-30 rounded-full" name="ItemName" required />
+            </div>
           <div className="flex gap-4">
             {/* Item Name */}
             <div className="grid grid-cols-[150px_1fr] items-center gap-4">
@@ -119,14 +152,60 @@ function Item() {
           <Accordion type="single" collapsible>
             <AccordionItem value="item-1">
               <AccordionTrigger className="border-b border-b-gray-100 p-4 ">
-
-
                 <span className="text-xl">Add Data</span>
-
               </AccordionTrigger>
 
-              <AccordionContent className="p-4">
-                Yes. It adheres to the WAI-ARIA design pattern.
+              <AccordionContent className="p-4 space-y-4">
+                {/* CATEGORY */}
+                <div className="grid grid-cols-[150px_1fr] items-center gap-4 ">
+                  <Label>Category</Label>
+                  <Select value={category} onValueChange={setCategory}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((c) => (
+                        <SelectItem key={c._id} value={c._id}>
+                          {c.categoryName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* BRAND */}
+                <div className="grid grid-cols-[150px_1fr] items-center gap-4">
+                  <Label>Brand</Label>
+                  <Select value={brand} onValueChange={setBrand}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select brand" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {brands.map((b) => (
+                        <SelectItem key={b._id} value={b._id}>
+                          {b.brandName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* UNIT */}
+                <div className="grid grid-cols-[150px_1fr] items-center gap-4">
+                  <Label>Unit</Label>
+                  <Select value={unit} onValueChange={setUnit}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select unit" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {units.map((u) => (
+                        <SelectItem key={u._id} value={u._id}>
+                          {u.unitName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </AccordionContent>
             </AccordionItem>
           </Accordion>
