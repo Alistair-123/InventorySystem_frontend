@@ -3,11 +3,16 @@ import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-
 import axiosInstance from "@/utils/axiosInstance";
-import { fetchReferenceData } from "./api/fetchedData";
-
-import type { CategoryRef, BrandRef, UnitRef, MongoId } from "./types/types";
+import { fetchReferenceData, createItem } from "./api/fetchedData";
+import type {
+  CategoryRef,
+  BrandRef,
+  UnitRef,
+  MongoId,
+  CreateItemPayload,
+} from "./types/types";
+import { useForm, Controller } from "react-hook-form";
 
 import {
   Table,
@@ -39,7 +44,7 @@ function Item() {
   const [categories, setCategories] = useState<CategoryRef[]>([]);
   const [brands, setBrands] = useState<BrandRef[]>([]);
   const [units, setUnits] = useState<UnitRef[]>([]);
-
+  const [preview, setPreview] = useState<string | null>(null);
   const [category, setCategory] = useState<MongoId>("");
   const [brand, setBrand] = useState<MongoId>("");
   const [unit, setUnit] = useState<MongoId>("");
@@ -60,10 +65,56 @@ function Item() {
     loadReferenceData();
   }, []);
 
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+     setValue,
+    formState: { errors },
+  } = useForm<CreateItemPayload>({
+    defaultValues: {
+      status: "active",
+    },
+  });
+
+  const onSubmit = async (values: CreateItemPayload) => {
+    const formData = new FormData();
+
+    formData.append("itemName", values.itemName);
+    formData.append("itemDescription", values.itemDescription ?? "");
+    formData.append("category", values.category);
+    formData.append("brand", values.brand);
+    formData.append("unit", values.unit);
+    formData.append("uploadType", "itemsimage");
+
+
+    if (values.itemImage && values.itemImage.length > 0) {
+  formData.append("itemImage", (values.itemImage as FileList)[0]);
+}
+
+    await createItem(formData);
+
+    reset();
+    setIsOpen(false);
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+
+  if (file) {
+    setPreview(URL.createObjectURL(file));
+    setValue("itemImage", e.target.files as FileList, {
+      shouldValidate: true,
+    });
+  }
+};
+
+
   return (
     <div className="font-poppins">
       <Dashboardheader title="Item Management" />
-      <div className="flex items-center justify-between p-4">
+      <div className="flex items-center justify-between p-8 ">
         <Input
           type="text"
           placeholder="Search Items..."
@@ -106,118 +157,184 @@ function Item() {
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         title="Create Item"
-        className="max-w-none font-poppins"
+        className="max-w-none font-poppins h-[80%]"
       >
-        <div className="p-4 space-y-6">
-            <div className="grid grid-cols-[150px_1fr] items-center gap-4">
-              <Label>Item Image</Label>
-              <Input type="file" className="w-30 h-30 rounded-full" name="ItemName" required />
-            </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="p-4 space-y-6">
+          {/* ITEM IMAGE */}
           <div className="flex gap-4">
-            {/* Item Name */}
+            <Label className="pr-17">Item Image</Label>
+                <Controller
+                name="itemImage"
+                control={control}
+                render={({ field }) => (
+                  <label className="cursor-pointer">
+                    {preview ? (
+                      <img
+                        src={preview}
+                        className="w-30 h-30 rounded-full object-cover border"
+                      />
+                    ) : (
+                      <div className="w-30 h-30 rounded-full border flex items-center justify-center">
+                        Select Image
+                      </div>
+                    )}
+
+                    <Input
+                    name="itemImage" 
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const files = e.target.files;
+                        if (!files) return;
+                        field.onChange(files);
+                        setPreview(URL.createObjectURL(files[0]));
+                      }}
+                    />
+                  </label>
+                )}
+              />
+</div>
+
+          <div className="flex gap-4">
+            {/* ITEM NAME */}
             <div className="grid grid-cols-[150px_1fr] items-center gap-4">
               <Label>Item Name</Label>
-              <Input name="ItemName" required />
+              <Input
+                {...register("itemName", { required: "Item name is required" })}
+              />
             </div>
 
-            {/* Status */}
+            {/* STATUS */}
             <div className="flex items-center w-[40%] gap-4">
               <Label>Status</Label>
-              <Select>
-                <SelectTrigger className="w-full min-w-0">
-                  <SelectValue placeholder="Select" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-green-500" />
-                      Active
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="inactive">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-red-500" />
-                      Inactive
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+              <Controller
+                control={control}
+                name="status"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active"><span className="h-2 w-2 rounded-full bg-green-500"></span>Active</SelectItem>
+                      <SelectItem value="inactive"><span className="h-2 w-2 rounded-full bg-red-500" />Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
           </div>
-          {/* Item Description */}
+
+          {/* DESCRIPTION */}
           <div className="grid grid-cols-[150px_1fr] gap-4">
             <Label className="pt-2">Item Description</Label>
-            <Textarea name="ItemDescription" rows={4} required />
+            <Textarea rows={4} {...register("itemDescription")} />
           </div>
+
           <Accordion type="single" collapsible>
             <AccordionItem value="item-1">
-              <AccordionTrigger className="border-b border-b-gray-100 p-4 ">
+              <AccordionTrigger className="border-b border-b-gray-100 p-4">
                 <span className="text-xl">Add Data</span>
               </AccordionTrigger>
 
               <AccordionContent className="p-4 space-y-4">
                 {/* CATEGORY */}
-                <div className="grid grid-cols-[150px_1fr] items-center gap-4 ">
+                <div className="grid grid-cols-[150px_1fr] items-center gap-4">
                   <Label>Category</Label>
-                  <Select value={category} onValueChange={setCategory}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((c) => (
-                        <SelectItem key={c._id} value={c._id}>
-                          {c.categoryName}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Controller
+                    control={control}
+                    name="category"
+                    rules={{ required: true }}
+                    render={({ field }) => (
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.map((c) => (
+                            <SelectItem key={c._id} value={c._id}>
+                              {c.categoryName}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
                 </div>
 
                 {/* BRAND */}
                 <div className="grid grid-cols-[150px_1fr] items-center gap-4">
                   <Label>Brand</Label>
-                  <Select value={brand} onValueChange={setBrand}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select brand" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {brands.map((b) => (
-                        <SelectItem key={b._id} value={b._id}>
-                          {b.brandName}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Controller
+                    control={control}
+                    name="brand"
+                    rules={{ required: true }}
+                    render={({ field }) => (
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select brand" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {brands.map((b) => (
+                            <SelectItem key={b._id} value={b._id}>
+                              {b.brandName}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
                 </div>
 
                 {/* UNIT */}
                 <div className="grid grid-cols-[150px_1fr] items-center gap-4">
                   <Label>Unit</Label>
-                  <Select value={unit} onValueChange={setUnit}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select unit" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {units.map((u) => (
-                        <SelectItem key={u._id} value={u._id}>
-                          {u.unitName}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Controller
+                    control={control}
+                    name="unit"
+                    rules={{ required: true }}
+                    render={({ field }) => (
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select unit" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {units.map((u) => (
+                            <SelectItem key={u._id} value={u._id}>
+                              {u.unitName}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
                 </div>
               </AccordionContent>
             </AccordionItem>
           </Accordion>
 
-          {/* Actions */}
+          {/* ACTIONS */}
           <div className="flex justify-end gap-2 pt-6">
-            <Button variant="outline" onClick={() => setIsOpen(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsOpen(false)}
+            >
               Cancel
             </Button>
-            <Button>Save</Button>
+            <Button type="submit">Save</Button>
           </div>
-        </div>
+        </form>
       </Modal>
 
       {/* ------------------------------------------------- */}
