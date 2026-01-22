@@ -42,7 +42,7 @@ function Category() {
   const [totalPages, setTotalPages] = useState(1);
   const limit = 20;
   const [search, setSearch] = useState("");
-  const [deleteOpen, setDeleteOpen] = useState(false);
+  // const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<GetCategory | null>(
     null
   );
@@ -87,8 +87,7 @@ function Category() {
     handleSubmit,
     control,
     reset,
-    getValues,
-    formState: { errors, isSubmitting },
+    formState: { isSubmitting },
   } = useForm<CreateCategory>({
     defaultValues: {
       categoryName: "",
