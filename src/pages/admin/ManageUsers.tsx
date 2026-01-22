@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/static-components */
 import React, { useState } from "react";
-import { FiUsers, FiUserPlus, FiClipboard } from "react-icons/fi";
+import { FiUsers, FiUserPlus, FiClipboard, FiUser } from "react-icons/fi";
 import AddPersonnel from "./AddPersonnel";
 
 type ManageUsersProps = {
@@ -90,10 +90,10 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ onClose }) => {
             </button>
           </div>
 
-          {/* MANAGE USERS — UNTOUCHED LOGIC, BETTER UI */}
+          {/* MANAGE USERS */}
           {view === "manage" && (
             <div>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 mb-4">
                 Manage your personnels below. You can edit or delete existing personnels.
               </p>
 
@@ -101,28 +101,45 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ onClose }) => {
                 <table className="min-w-full text-sm">
                   <thead className="bg-gray-100">
                     <tr>
-                      <th className="px-4 py-3 text-left font-medium text-gray-600">Name</th>
-                      <th className="px-4 py-3 text-left font-medium text-gray-600">User ID</th>
-                      <th className="px-4 py-3 text-left font-medium text-gray-600">Role</th>
-                      <th className="px-4 py-3 text-right font-medium text-gray-600">Actions</th>
+                      <th className="px-6 py-3 text-left font-medium text-gray-600">Name</th>
+                      <th className="px-6 py-3 text-left font-medium text-gray-600">User ID</th>
+                      <th className="px-6 py-3 text-left font-medium text-gray-600">Role</th>
+                      <th className="px-6 py-3 text-right font-medium text-gray-600">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y">
+                  <tbody className="divide-y divide-gray-200">
                     {[
                       { name: "GC Evo", userid: "ADMIN-001", role: "Admin" },
                       { name: "Evo GC", userid: "USER-002", role: "User" },
                     ].map((user) => (
                       <tr key={user.userid} className="hover:bg-gray-50">
-                        <td className="px-4 py-3">{user.name}</td>
-                        <td className="px-4 py-3">{user.userid}</td>
-                        <td className="px-4 py-3">{user.role}</td>
-                        <td className="px-4 py-3 text-right space-x-2">
-                          <button className="px-3 py-1 text-xs rounded border border-green-300 text-green-700 hover:bg-green-600 hover:text-white transition">
-                            Edit
-                          </button>
-                          <button className="px-3 py-1 text-xs rounded border border-red-300 text-red-700 hover:bg-red-600 hover:text-white transition">
-                            Delete
-                          </button>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center">
+                            <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                              <FiUser className="h-5 w-5 text-gray-500" />
+                            </div>
+                            <span className="text-gray-900 font-medium">{user.name}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-gray-600">{user.userid}</td>
+                        <td className="px-6 py-4">
+                          <span className={`px-3 py-1 text-xs font-medium rounded-full ${
+                            user.role === 'Admin' 
+                              ? 'bg-blue-100 text-blue-800' 
+                              : 'bg-green-100 text-green-800'
+                          }`}>
+                            {user.role}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex justify-end space-x-2">
+                            <button className="px-3 py-1 text-xs rounded border border-green-300 text-green-700 hover:bg-green-600 hover:text-white transition">
+                              Edit
+                            </button>
+                            <button className="px-3 py-1 text-xs rounded border border-red-300 text-red-700 hover:bg-red-600 hover:text-white transition">
+                              Delete
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}

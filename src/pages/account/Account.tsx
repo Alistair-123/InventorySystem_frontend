@@ -1,6 +1,12 @@
-/* eslint-disable react-hooks/static-components */
-import React, { useState } from "react";
-import { FiUser, FiLock, FiClock } from "react-icons/fi";
+import React, { useState, useRef } from "react";
+import { FiUser, FiLock, FiClock, FiCamera } from "react-icons/fi";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type AccountProps = {
   onClose: () => void;
@@ -10,6 +16,33 @@ type View = "info" | "password" | "logs";
 
 const Account: React.FC<AccountProps> = ({ onClose }) => {
   const [view, setView] = useState<View>("info");
+  const [previewUrl, setPreviewUrl] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Check file size (5MB max)
+      if (file.size > 50 * 1024 * 1024) {
+        alert('File size should be less than 5MB');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        setPreviewUrl(result);
+      };
+      reader.onerror = () => {
+        alert('Error reading file');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
 
   const SidebarButton = ({
     active,
@@ -94,30 +127,153 @@ const Account: React.FC<AccountProps> = ({ onClose }) => {
 
           {/* EDIT USER INFO */}
           {view === "info" && (
-            <form className="space-y-6 max-w-xl">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Full Name:
-                </label>
-                <input
-                  type="text"
-                  placeholder="Juan Dela Cruz"
-                  className={inputClass}
-                />
+            <form className="space-y-6">
+              {/* Profile Picture Section - Full Width */}
+              <div className="flex items-center gap-6 mb-6">
+                <div className="relative">
+                  <div 
+                    className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-50 to-gray-100 flex items-center justify-center overflow-hidden border-2 border-white shadow-md cursor-pointer"
+                    onClick={triggerFileInput}
+                  >
+                    {previewUrl ? (
+                      <img
+                        src={previewUrl}
+                        alt="Profile preview"
+                        className="w-full h-full object-cover"
+                        onError={() => setPreviewUrl('')}
+                      />
+                    ) : (
+                      <div className="text-gray-400">
+                        <FiUser className="w-8 h-8" />
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      triggerFileInput();
+                    }}
+                    className="absolute -bottom-2 -right-2 bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-all shadow-lg hover:scale-110"
+                    title="Change profile picture"
+                  >
+                    <FiCamera className="w-4 h-4" />
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleFileChange}
+                  />
+                </div>
+                <div>
+                  <h3 className="font-medium text-gray-900">Profile Photo</h3>
+                  <p className="text-sm text-gray-500">JPG, GIF or PNG. Max size of 5MB</p>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  User ID:
-                </label>
-                <input
-                  type="text"
-                  placeholder="USER-001"
-                  className={inputClass}
-                  disabled
-                />
+              {/* Name Fields - 3 columns */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    First Name:
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Juan"
+                    className={inputClass}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Middle Name:
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="M."
+                    className={inputClass}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Last Name:
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Dela Cruz"
+                    className={inputClass}
+                  />
+                </div>
               </div>
 
+              {/* Personnel Type and Status - 2 columns */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Personnel Type:
+                  </label>
+                  <Select>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="plantilla">Plantilla</SelectItem>
+                      <SelectItem value="job-order">Job Order</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status:
+                  </label>
+                  <Select>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">
+                        <span className="h-2.5 w-2.5 rounded-full bg-green-500 mr-2 inline-block" />
+                        Active
+                      </SelectItem>
+                      <SelectItem value="resigned">
+                        <span className="h-2.5 w-2.5 rounded-full bg-red-500 mr-2 inline-block" />
+                        Resigned
+                      </SelectItem>
+                      <SelectItem value="retired">
+                        <span className="h-2.5 w-2.5 rounded-full bg-yellow-500 mr-2 inline-block" />
+                        Retired
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Designation and User ID - 2 columns */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Designation Name:
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g., Administrative Officer II"
+                    className={inputClass}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    User ID:
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="USER-001"
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+
+              {/* Save Button */}
               <div className="flex justify-end pt-4 border-t">
                 <button
                   type="submit"
@@ -183,6 +339,7 @@ const Account: React.FC<AccountProps> = ({ onClose }) => {
                 Your recent account activities:
               </p>
 
+              {/* MOCK DATA */}
               <div className="border border-gray-200 rounded-lg overflow-hidden">
                 <ul className="divide-y text-sm">
                   <li className="px-4 py-3 hover:bg-gray-50">
