@@ -217,11 +217,11 @@ function Category() {
           <TableCaption>List of Categories</TableCaption>
           <TableHeader>
   <TableRow>
-    <TableHead className="w-12">#</TableHead>
-    <TableHead className="w-30">Category ID</TableHead>
-    <TableHead>Category Name</TableHead>
-    <TableHead>Status</TableHead>
-    <TableHead className="w-30">Actions</TableHead>
+    <TableHead className="w-12 font-semibold">#</TableHead>
+    <TableHead className="w-30 font-semibold">Category ID</TableHead>
+    <TableHead className="font-semibold">Category Name</TableHead>
+    <TableHead className="font-semibold">Status</TableHead>
+    <TableHead className="w-30 font-semibold">Actions</TableHead>
   </TableRow>
 </TableHeader>
 

@@ -32,6 +32,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import { toastSuccess, toastError } from "@/utils/toast";
 
 function Brand() {
   const [isOpen, setIsOpen] = useState(false);
@@ -42,27 +43,27 @@ function Brand() {
   const [totalPages, setTotalPages] = useState(1);
   const limit = 20;
   const [search, setSearch] = useState("");
+
   const [mode, setMode] = useState<"create" | "edit">("create");
-  const [pendingEditData, setPendingEditData] = useState<CreateBrand | null>(
-    null
-  );
+  const [pendingEditData, setPendingEditData] =
+    useState<CreateBrand | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [confirmType, setConfirmType] = useState<"delete" | "edit">("delete");
-  const [selectedBrand, setSelectedBrand] = useState<GetBrand | null>(null);
+  const [confirmType, setConfirmType] =
+    useState<"delete" | "edit">("delete");
+  const [selectedBrand, setSelectedBrand] =
+    useState<GetBrand | null>(null);
 
-
+  /* =========================
+     FETCH BRANDS
+  ========================= */
   const fetchData = useCallback(async () => {
     try {
       setIsLoading(true);
       setIsError(false);
 
       const res = await axiosInstance.get("/brand/getbrand", {
-        params: {
-          page,
-          limit,
-          search,
-        },
+        params: { page, limit, search },
       });
 
       setBrands(res.data.data ?? []);
@@ -70,7 +71,7 @@ function Brand() {
     } catch (error) {
       console.error(error);
       setIsError(true);
-      setBrands([]);
+      toastError("Failed to load brands");
     } finally {
       setIsLoading(false);
     }
@@ -80,13 +81,15 @@ function Brand() {
     fetchData();
   }, [fetchData]);
 
+  /* =========================
+     FORM
+  ========================= */
   const {
     register,
     handleSubmit,
     control,
     reset,
-    getValues,
-    formState: { errors, isSubmitting },
+    formState: { isSubmitting },
   } = useForm<CreateBrand>({
     defaultValues: {
       brandName: "",
@@ -94,6 +97,9 @@ function Brand() {
     },
   });
 
+  /* =========================
+     CREATE / EDIT SUBMIT
+  ========================= */
   const onSubmit = async (data: CreateBrand) => {
     if (mode === "edit") {
       setPendingEditData(data);
@@ -102,12 +108,20 @@ function Brand() {
       return;
     }
 
-    await axiosInstance.post("/brand/createbrand", data);
-    reset();
-    setIsOpen(false);
-    fetchData();
+    try {
+      await axiosInstance.post("/brand/createbrand", data);
+      toastSuccess("Brand created successfully");
+      reset();
+      setIsOpen(false);
+      fetchData();
+    } catch {
+      toastError("Failed to create brand");
+    }
   };
 
+  /* =========================
+     EDIT
+  ========================= */
   const handleEdit = (brand: GetBrand) => {
     setMode("edit");
     setSelectedBrand(brand);
@@ -120,93 +134,104 @@ function Brand() {
     setIsOpen(true);
   };
 
-   const handleDeleteClick = (brand: GetBrand) => {
-      setSelectedBrand(brand);
-      setConfirmType("delete");
-      setConfirmOpen(true);
-    };
+  /* =========================
+     DELETE
+  ========================= */
+  const handleDeleteClick = (brand: GetBrand) => {
+    setSelectedBrand(brand);
+    setConfirmType("delete");
+    setConfirmOpen(true);
+  };
 
-     const handleConfirm = async () => {
-        if (!selectedBrand) return;
-    
-        try {
-          setIsProcessing(true);
-    
-          if (confirmType === "delete") {
-            await axiosInstance.delete(
-              `/brand/deletebrand/${selectedBrand._id}`
-            );
-            fetchData();
-          }
-    
-          setConfirmOpen(false);
-          setSelectedBrand(null);
-        } catch (error) {
-          console.error(error);
-        } finally {
-          setIsProcessing(false);
-        }
-      };
+  const handleConfirmDelete = async () => {
+    if (!selectedBrand) return;
 
-      const confirmEdit = async () => {
-          if (!selectedBrand || !pendingEditData) return;
-      
-          try {
-            setIsProcessing(true);
-      
-            await axiosInstance.put(
-              `/brand/updatebrand/${selectedBrand._id}`,
-              pendingEditData
-            );
-      
-            setConfirmOpen(false);
-            setIsOpen(false);
-            setPendingEditData(null);
-            setSelectedBrand(null);
-            reset();
-            setMode("create");
-      
-            fetchData();
-          } finally {
-            setIsProcessing(false);
-          }
-        };
+    try {
+      setIsProcessing(true);
+      await axiosInstance.delete(
+        `/brand/deletebrand/${selectedBrand._id}`
+      );
+      toastSuccess("Brand deleted successfully");
+      fetchData();
+    } catch {
+      toastError("Failed to delete brand");
+    } finally {
+      setIsProcessing(false);
+      setConfirmOpen(false);
+      setSelectedBrand(null);
+    }
+  };
+
+  /* =========================
+     CONFIRM EDIT
+  ========================= */
+  const confirmEdit = async () => {
+    if (!selectedBrand || !pendingEditData) return;
+
+    try {
+      setIsProcessing(true);
+      await axiosInstance.put(
+        `/brand/updatebrand/${selectedBrand._id}`,
+        pendingEditData
+      );
+
+      toastSuccess("Brand updated successfully");
+
+      setConfirmOpen(false);
+      setIsOpen(false);
+      setPendingEditData(null);
+      setSelectedBrand(null);
+      reset();
+      setMode("create");
+
+      fetchData();
+    } catch {
+      toastError("Failed to update brand");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   return (
     <div className="font-poppins">
       <Dashboardheader title="Brand Management" />
+
+      {/* SEARCH + ADD */}
       <div className="flex items-center justify-between p-8">
         <Input
           type="text"
           placeholder="Search Brands..."
-          className="w-75 font-poppins"
-           onChange={(e) => {
+          className="w-75"
+          onChange={(e) => {
             setSearch(e.target.value);
-            setPage(1); // reset pagination on new search
+            setPage(1);
           }}
         />
-        <Button className="cursor-pointer" onClick={() => setIsOpen(true)}>
-          Add Brand
-        </Button>
+        <Button onClick={() => setIsOpen(true)}>Add Brand</Button>
       </div>
 
+      {/* TABLE */}
       <div className="p-8">
-        <Table className="p-4 ">
+        <Table>
           <TableCaption>List of Brands</TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead>#</TableHead>
-              <TableHead className="w-30">Brand ID</TableHead>
-              <TableHead>Brand Name</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="w-30">Actions</TableHead>
+              <TableHead className="w-12
+              font-semibold">#</TableHead>
+              <TableHead className="w-30 font-semibold">Brand ID</TableHead>
+              <TableHead className="font-semibold">Brand Name</TableHead>
+              <TableHead className="font-semibold">Status</TableHead>
+              <TableHead className="w-30 font-semibold">
+                Actions
+              </TableHead>
             </TableRow>
           </TableHeader>
+
           <TableBody>
             {isLoading && (
               <TableRow>
                 <TableCell colSpan={5} className="text-center">
-                  Loading categories...
+                  Loading brands...
                 </TableCell>
               </TableRow>
             )}
@@ -214,40 +239,25 @@ function Brand() {
             {isError && !isLoading && (
               <TableRow>
                 <TableCell colSpan={5} className="text-center text-red-500">
-                  Failed to load categories.
-                  <Button variant="link" className="ml-2" onClick={fetchData}>
-                    Retry
-                  </Button>
-                </TableCell>
-              </TableRow>
-            )}
-
-            {!isLoading && !isError && brands.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center text-red-400">
-                  No Brands found
+                  Failed to load brands
                 </TableCell>
               </TableRow>
             )}
 
             {!isLoading &&
               !isError &&
-              brands.map((brands, index) => {
+              brands.map((brand, index) => {
                 const rowNumber = (page - 1) * limit + index + 1;
 
                 return (
-                  <TableRow key={brands._id}>
-                    <TableCell className="w-12 text-muted-foreground">
-                      {rowNumber}
-                    </TableCell>
-
-                    <TableCell>{brands.brandId}</TableCell>
-                    <TableCell>{brands.brandName}</TableCell>
+                  <TableRow key={brand._id}>
+                    <TableCell>{rowNumber}</TableCell>
+                    <TableCell>{brand.brandId}</TableCell>
+                    <TableCell>{brand.brandName}</TableCell>
                     <TableCell>
-                      <StatusDot status={brands.status} />
+                      <StatusDot status={brand.status} />
                     </TableCell>
-
-                    <TableCell className="text-right pr-15">
+                    <TableCell className="text-center">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon">
@@ -257,14 +267,15 @@ function Brand() {
 
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
-                             onClick={() => handleEdit(brands)}
+                            onClick={() => handleEdit(brand)}
                           >
                             Edit
                           </DropdownMenuItem>
-
                           <DropdownMenuItem
-                            className="text-red-500 focus:text-red-500"
-                            onClick={() => handleDeleteClick(brands)}
+                            className="text-red-500"
+                            onClick={() =>
+                              handleDeleteClick(brand)
+                            }
                           >
                             Delete
                           </DropdownMenuItem>
@@ -274,69 +285,73 @@ function Brand() {
                   </TableRow>
                 );
               })}
-          </TableBody>     
+          </TableBody>
         </Table>
 
-        <div className="flex items-center justify-center gap-4 p-4">
-                    <Button
-                      variant="outline"
-                      disabled={page === 1}
-                      onClick={() => setPage((prev) => prev - 1)}
-                    >
-                      Previous
-                    </Button>
-          
-                    <span className="text-sm">
-                      Page {page} of {totalPages}
-                    </span>
-          
-                    <Button
-                      variant="outline"
-                      disabled={page === totalPages}
-                      onClick={() => setPage((prev) => prev + 1)}
-                    >
-                      Next
-                    </Button>
-                  </div>
+        {/* PAGINATION */}
+        <div className="flex justify-center gap-4 p-4">
+          <Button
+            variant="outline"
+            disabled={page === 1}
+            onClick={() => setPage((p) => p - 1)}
+          >
+            Previous
+          </Button>
+
+          <span className="text-sm">
+            Page {page} of {totalPages}
+          </span>
+
+          <Button
+            variant="outline"
+            disabled={page === totalPages}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Next
+          </Button>
+        </div>
       </div>
 
+      {/* MODAL */}
       <Modal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         title={mode === "edit" ? "Edit Brand" : "Create Brand"}
-        className="max-w-none font-poppins"
       >
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 p-8">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-5 p-8"
+        >
           <div className="flex">
             <Label className="w-50">Brand Name</Label>
-            <Input
-              {...register("brandName", {
-                required: "Brand name is required",
-              })}
-            />
+            <Input {...register("brandName", { required: true })} />
           </div>
 
           <div className="flex">
             <Label className="w-50">Status</Label>
-
             <Controller
               name="status"
               control={control}
               render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select status" />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="active">
-                      {" "}
-                      <span className="h-2.5 w-2.5 rounded-full bg-green-500" />
-                      Active
+                      <div className="flex items-center gap-2">
+                        <span className="h-2.5 w-2.5 rounded-full bg-green-500" />
+                        Active
+                      </div>
                     </SelectItem>
                     <SelectItem value="inactive">
-                      {" "}
-                      <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
-                      Inactive
+                      <div className="flex items-center gap-2">
+                        <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
+                        Inactive
+                      </div>
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -352,7 +367,6 @@ function Brand() {
             >
               Cancel
             </Button>
-
             <Button type="submit" disabled={isSubmitting}>
               {mode === "edit" ? "Save Changes" : "Save"}
             </Button>
@@ -360,34 +374,27 @@ function Brand() {
         </form>
       </Modal>
 
+      {/* CONFIRM ACTION */}
       <ConfirmAction
         open={confirmOpen}
         type={confirmType}
         title={
-          confirmType === "delete" ? "Confirm Deletion" : "Confirm Changes"
+          confirmType === "delete"
+            ? "Confirm Deletion"
+            : "Confirm Changes"
         }
         description={
-          confirmType === "delete" ? (
-            <>
-              Are you sure you want to delete{" "}
-              <span className="font-semibold text-red-500">
-                {selectedBrand?.brandName}
-              </span>
-              ? This action cannot be undone.
-            </>
-          ) : (
-            <>
-              Are you sure you want to save changes to{" "}
-              <span className="font-semibold">
-                {selectedBrand?.brandName}
-              </span>
-              ?
-            </>
-          )
+          confirmType === "delete"
+            ? `Delete ${selectedBrand?.brandName}?`
+            : `Save changes to ${selectedBrand?.brandName}?`
         }
         confirmText={confirmType === "delete" ? "Delete" : "Confirm"}
         isLoading={isProcessing}
-        onConfirm={confirmType === "delete" ? handleConfirm : confirmEdit}
+        onConfirm={
+          confirmType === "delete"
+            ? handleConfirmDelete
+            : confirmEdit
+        }
         onCancel={() => {
           setConfirmOpen(false);
           setSelectedBrand(null);

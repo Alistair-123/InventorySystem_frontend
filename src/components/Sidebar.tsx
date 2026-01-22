@@ -17,7 +17,11 @@ import AdjustmentsIcon from "../assets/icons/icons_adjust.svg";
 import ReportsIcon from "../assets/icons/icons_reports.svg";
 import ProfileComponent from "./ProfileComponent";
 
-type SidebarItem = { label: string; url: string };
+type SidebarItem = {
+  label: string;
+  url: string;
+  icon?: React.ComponentType<{ size?: number; className?: string }>;
+};
 
 const iconMap: Record<string, string> = {
   Dashboard: DashboardIcon,
@@ -36,7 +40,7 @@ function Sidebar() {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const [logoVisible, setLogoVisible] = useState(false);
 
-  /* LOGO FADE-IN ON LOGIN */
+  /* LOGO FADE-IN */
   useEffect(() => {
     const t = setTimeout(() => setLogoVisible(true), 150);
     return () => clearTimeout(t);
@@ -94,8 +98,8 @@ function Sidebar() {
           src={collapsed ? SmallLogo : DictLongLogo}
           className={`
             transition-all duration-500 ease-out
-            ${collapsed ? "h-10" : "h-18"}
-            ${logoVisible ? "opacity-100 translate-x-0.5" : "opacity-0 translate-x-0"}
+            ${collapsed ? "h-10" : "h-16"}
+            ${logoVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}
             group-hover:scale-105
             drop-shadow-sm
           `}
@@ -126,9 +130,7 @@ function Sidebar() {
                   }`
                 }
               >
-                {iconSrc && (
-                  <img src={iconSrc} className="w-5 h-5 opacity-80" />
-                )}
+                {iconSrc && <img src={iconSrc} className="w-5 h-5 opacity-80" />}
                 {!collapsed && item.label}
               </NavLink>
             );
@@ -167,29 +169,35 @@ function Sidebar() {
                 )}
               </button>
 
-              {/* CHILDREN */}
+              {/* CHILDREN WITH ICONS RESTORED */}
               <div
                 className={`overflow-hidden transition-all duration-300 ease-in-out ${
                   isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
                 }`}
               >
                 <ul className="mt-1 ml-6 border-l border-gray-300 pl-3 space-y-1">
-                  {children.map((item) => (
-                    <NavLink
-                      key={item.url}
-                      to={item.url}
-                      end
-                      className={({ isActive }) =>
-                        `${baseNav} ${
-                          isActive
-                            ? "bg-blue-100 text-blue-800 font-medium"
-                            : "text-gray-600 hover:bg-gray-100 hover:translate-x-1"
-                        }`
-                      }
-                    >
-                      {!collapsed && item.label}
-                    </NavLink>
-                  ))}
+                  {children.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <NavLink
+                        key={item.url}
+                        to={item.url}
+                        end
+                        className={({ isActive }) =>
+                          `${baseNav} ${
+                            isActive
+                              ? "bg-blue-100 text-blue-800 font-medium"
+                              : "text-gray-600 hover:bg-gray-100 hover:translate-x-1"
+                          }`
+                        }
+                      >
+                        {Icon && !collapsed && (
+                          <Icon size={16} className="opacity-80 mr-2" />
+                        )}
+                        {!collapsed && item.label}
+                      </NavLink>
+                    );
+                  })}
                 </ul>
               </div>
             </div>

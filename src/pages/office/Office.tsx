@@ -185,11 +185,11 @@ function Offices() {
         <TableCaption>List of Offices</TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead>#</TableHead>
-            <TableHead className="w-30">Office ID</TableHead>
-            <TableHead>Office Name</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className='w-30'>Actions</TableHead>
+            <TableHead className="font-semibold">#</TableHead>
+            <TableHead className="w-30 font-semibold">Office ID</TableHead>
+            <TableHead className="font-semibold">Office Name</TableHead>
+            <TableHead className="font-semibold">Status</TableHead>
+            <TableHead className='w-30 font-semibold'>Actions</TableHead>
          
           </TableRow>
         </TableHeader>

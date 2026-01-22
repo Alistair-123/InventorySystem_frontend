@@ -183,11 +183,11 @@ function Acquisitions() {
         <TableCaption>List of Acquisition</TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead>#</TableHead>
-            <TableHead className="w-50">Acquisition Type ID</TableHead>
-            <TableHead className="">Acquisition Type Name</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className='w-30'>Actions</TableHead>
+            <TableHead className="font-semibold">#</TableHead>
+            <TableHead className="w-50 font-semibold">Acquisition Type ID</TableHead>
+            <TableHead className="font-semibold">Acquisition Type Name</TableHead>
+            <TableHead className="font-semibold">Status</TableHead>
+            <TableHead className='w-30 font-semibold'>Actions</TableHead>
          
           </TableRow>
         </TableHeader>

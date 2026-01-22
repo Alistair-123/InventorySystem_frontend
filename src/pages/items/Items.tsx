@@ -317,15 +317,15 @@ function Item() {
 
           <TableHeader>
             <TableRow>
-              <TableHead>#</TableHead>
-              <TableHead>Item Image</TableHead>
-              <TableHead className="w-30">Item ID</TableHead>
-              <TableHead>Item Name</TableHead>
-              <TableHead>Item Description</TableHead>
-              <TableHead>Category Name</TableHead>
-              <TableHead>Brand Name</TableHead>
-              <TableHead>Unit Name</TableHead>
-              <TableHead className="w-30">Actions</TableHead>
+              <TableHead className="font-semibold">#</TableHead>
+              <TableHead className="font-semibold">Item Image</TableHead>
+              <TableHead className="w-30 font-semibold">Item ID</TableHead>
+              <TableHead className="font-semibold">Item Name</TableHead>
+              <TableHead className="font-semibold">Item Description</TableHead>
+              <TableHead className="font-semibold">Category Name</TableHead>
+              <TableHead className="font-semibold">Brand Name</TableHead>
+              <TableHead className="font-semibold">Unit Name</TableHead>
+              <TableHead className="w-30 font-semibold">Actions</TableHead>
             </TableRow>
           </TableHeader>
 

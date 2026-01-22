@@ -193,11 +193,11 @@ function Units() {
           <TableCaption>List of Units</TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead>#</TableHead>
-              <TableHead className="w-30">Unit ID</TableHead>
-              <TableHead>Unit Name</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="w-30">Actions</TableHead>
+              <TableHead className="font-semibold">#</TableHead>
+              <TableHead className="w-30 font-semibold">Unit ID</TableHead>
+              <TableHead className="font-semibold">Unit Name</TableHead>
+              <TableHead className="font-semibold">Status</TableHead>
+              <TableHead className="w-30 font-semibold">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
