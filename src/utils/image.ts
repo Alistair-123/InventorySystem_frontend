@@ -1,10 +1,11 @@
 const API_URL = "http://localhost:5000";
 
-export function resolveImageUrl(path?: string | null) {
-  if (!path) return null;
+export function resolveImageUrl(image?: string | null) {
+  if (!image) return "/image.png";
 
-  // already absolute
-  if (path.startsWith("http")) return path;
+  // already absolute (future-proof)
+  if (image.startsWith("http")) return image;
 
-  return `${API_URL}/${path}`;
+  // ✅ must include /uploads
+  return `${API_URL}/uploads/${image}`;
 }
