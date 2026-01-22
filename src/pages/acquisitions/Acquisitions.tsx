@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import Dashboardheader from "@/components/Dashboardheader";
 import React, { useState, useEffect, useCallback } from "react";
 import ConfirmAction from "@/components/ActionMenu";
@@ -32,6 +33,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import { toastSuccess, toastError } from "@/utils/toast";
 
 function Acquisitions() {
     const [isOpen, setIsOpen] = useState(false);
@@ -93,18 +95,28 @@ function Acquisitions() {
             });
           
             const onSubmit = async (data: CreateAcquisition) => {
-              if (mode === "edit") {
-                setPendingEditData(data);
-                setConfirmType("edit");
-                setConfirmOpen(true);
-                return;
-              }
-          
-              await axiosInstance.post("/acquisitiontype/createacquisitiontype", data);
-              reset();
-              setIsOpen(false);
-              fetchData();
-            };
+  if (mode === "edit") {
+    setPendingEditData(data);
+    setConfirmType("edit");
+    setConfirmOpen(true);
+    return;
+  }
+
+  try {
+    await axiosInstance.post(
+      "/acquisitiontype/createacquisitiontype",
+      data
+    );
+
+    toastSuccess("Acquisition type created successfully");
+    reset();
+    setIsOpen(false);
+    fetchData();
+  } catch (error) {
+    toastError("Failed to create acquisition type");
+  }
+};
+
           
             const handleEdit = (acquisition: GetAcquisition) => {
               setMode("edit");
@@ -125,48 +137,57 @@ function Acquisitions() {
             };
           
             const handleConfirm = async () => {
-              if (!selectedAcquisition) return;
-          
-              try {
-                setIsProcessing(true);
-          
-                if (confirmType === "delete") {
-                  await axiosInstance.delete(`/acquisitiontype/deleteacquisitiontype/${selectedAcquisition._id}`);
-                  fetchData();
-                }
-          
-                setConfirmOpen(false);
-                setSelectedAcquisition(null);
-              } catch (error) {
-                console.error(error);
-              } finally {
-                setIsProcessing(false);
-              }
-            };
-          
-            const confirmEdit = async () => {
-              if (!selectedAcquisition || !pendingEditData) return;
-          
-              try {
-                setIsProcessing(true);
-          
-                await axiosInstance.put(
-                  `/acquisitiontype/updateacquisitiontype/${selectedAcquisition._id}`,
-                  pendingEditData
-                );
-          
-                setConfirmOpen(false);
-                setIsOpen(false);
-                setPendingEditData(null);
-                setSelectedAcquisition(null);
-                reset();
-                setMode("create");
-          
-                fetchData();
-              } finally {
-                setIsProcessing(false);
-              }
-            };
+  if (!selectedAcquisition) return;
+
+  try {
+    setIsProcessing(true);
+
+    if (confirmType === "delete") {
+      await axiosInstance.delete(
+        `/acquisitiontype/deleteacquisitiontype/${selectedAcquisition._id}`
+      );
+
+      toastSuccess("Acquisition type deleted successfully");
+      fetchData();
+    }
+
+    setConfirmOpen(false);
+    setSelectedAcquisition(null);
+  } catch (error) {
+    toastError("Failed to delete acquisition type");
+  } finally {
+    setIsProcessing(false);
+  }
+};
+
+          const confirmEdit = async () => {
+  if (!selectedAcquisition || !pendingEditData) return;
+
+  try {
+    setIsProcessing(true);
+
+    await axiosInstance.put(
+      `/acquisitiontype/updateacquisitiontype/${selectedAcquisition._id}`,
+      pendingEditData
+    );
+
+    toastSuccess("Acquisition type updated successfully");
+
+    setConfirmOpen(false);
+    setIsOpen(false);
+    setPendingEditData(null);
+    setSelectedAcquisition(null);
+    reset();
+    setMode("create");
+
+    fetchData();
+  } catch (error) {
+    toastError("Failed to update acquisition type");
+  } finally {
+    setIsProcessing(false);
+  }
+};
+
   return (
     <div className='font-poppins'>
       <Dashboardheader title="Acquisition Management" />
@@ -183,11 +204,11 @@ function Acquisitions() {
         <TableCaption>List of Acquisition</TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead>#</TableHead>
-            <TableHead className="w-50">Acquisition Type ID</TableHead>
-            <TableHead className="">Acquisition Type Name</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className='w-30'>Actions</TableHead>
+            <TableHead className="font-semibold">#</TableHead>
+            <TableHead className="w-50 font-semibold">Acquisition Type ID</TableHead>
+            <TableHead className="font-semibold">Acquisition Type Name</TableHead>
+            <TableHead className="font-semibold">Status</TableHead>
+            <TableHead className='w-30 font-semibold'>Actions</TableHead>
          
           </TableRow>
         </TableHeader>

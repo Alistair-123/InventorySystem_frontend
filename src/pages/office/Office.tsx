@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import Dashboardheader from "@/components/Dashboardheader";
 import React, { useState, useEffect, useCallback } from "react";
 import ConfirmAction from "@/components/ActionMenu";
@@ -32,6 +33,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import { toastSuccess, toastError } from "@/utils/toast";
 
 function Offices() {
    const [isOpen, setIsOpen] = useState(false);
@@ -70,6 +72,7 @@ function Offices() {
           console.error(error);
           setIsError(true);
           setOffice([]);
+          toastError("Failed to load offices");
         } finally {
           setIsLoading(false);
         }
@@ -94,18 +97,25 @@ function Offices() {
       });
     
       const onSubmit = async (data: CreateOffice) => {
-        if (mode === "edit") {
-          setPendingEditData(data);
-          setConfirmType("edit");
-          setConfirmOpen(true);
-          return;
-        }
-    
-        await axiosInstance.post("/office/createoffice", data);
-        reset();
-        setIsOpen(false);
-        fetchData();
-      };
+  if (mode === "edit") {
+    setPendingEditData(data);
+    setConfirmType("edit");
+    setConfirmOpen(true);
+    return;
+  }
+
+  try {
+    await axiosInstance.post("/office/createoffice", data);
+    toastSuccess("Office created successfully");
+    reset();
+    setIsOpen(false);
+    fetchData();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (error) {
+    toastError("Failed to create office");
+  }
+};
+
     
       const handleEdit = (office: GetOffice) => {
         setMode("edit");
@@ -127,48 +137,57 @@ function Offices() {
       };
     
       const handleConfirm = async () => {
-        if (!selectedOffice) return;
-    
-        try {
-          setIsProcessing(true);
-    
-          if (confirmType === "delete") {
-            await axiosInstance.delete(`/office/deleteoffice/${selectedOffice._id}`);
-            fetchData();
-          }
-    
-          setConfirmOpen(false);
-          setSelectedOffice(null);
-        } catch (error) {
-          console.error(error);
-        } finally {
-          setIsProcessing(false);
-        }
-      };
+  if (!selectedOffice) return;
+
+  try {
+    setIsProcessing(true);
+
+    if (confirmType === "delete") {
+      await axiosInstance.delete(
+        `/office/deleteoffice/${selectedOffice._id}`
+      );
+      toastSuccess("Office deleted successfully");
+      fetchData();
+    }
+
+    setConfirmOpen(false);
+    setSelectedOffice(null);
+  } catch (error) {
+    toastError("Failed to delete office");
+  } finally {
+    setIsProcessing(false);
+  }
+};
+
     
       const confirmEdit = async () => {
-        if (!selectedOffice || !pendingEditData) return;
-    
-        try {
-          setIsProcessing(true);
-    
-          await axiosInstance.put(
-            `/office/updateoffice/${selectedOffice._id}`,
-            pendingEditData
-          );
-    
-          setConfirmOpen(false);
-          setIsOpen(false);
-          setPendingEditData(null);
-          setSelectedOffice(null);
-          reset();
-          setMode("create");
-    
-          fetchData();
-        } finally {
-          setIsProcessing(false);
-        }
-      };
+  if (!selectedOffice || !pendingEditData) return;
+
+  try {
+    setIsProcessing(true);
+
+    await axiosInstance.put(
+      `/office/updateoffice/${selectedOffice._id}`,
+      pendingEditData
+    );
+
+    toastSuccess("Office updated successfully");
+
+    setConfirmOpen(false);
+    setIsOpen(false);
+    setPendingEditData(null);
+    setSelectedOffice(null);
+    reset();
+    setMode("create");
+
+    fetchData();
+  } catch (error) {
+    toastError("Failed to update office");
+  } finally {
+    setIsProcessing(false);
+  }
+};
+
   return (
     <div className='font-poppins'>
       <Dashboardheader title="Office Management" />
@@ -185,11 +204,11 @@ function Offices() {
         <TableCaption>List of Offices</TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead>#</TableHead>
-            <TableHead className="w-30">Office ID</TableHead>
-            <TableHead>Office Name</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className='w-30'>Actions</TableHead>
+            <TableHead className="font-semibold">#</TableHead>
+            <TableHead className="w-30 font-semibold">Office ID</TableHead>
+            <TableHead className="font-semibold">Office Name</TableHead>
+            <TableHead className="font-semibold">Status</TableHead>
+            <TableHead className='w-30 font-semibold'>Actions</TableHead>
          
           </TableRow>
         </TableHeader>

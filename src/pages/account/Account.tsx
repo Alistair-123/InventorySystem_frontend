@@ -80,7 +80,7 @@ const Account: React.FC<AccountProps> = ({ onClose }) => {
       {/* Modal */}
       <div className="relative w-[900px] max-w-[95%] h-[90vh] bg-white rounded-2xl shadow-2xl flex overflow-hidden">
         {/* Sidebar */}
-        <aside className="w-64 bg-gray-50 border-r border-gray-200 flex flex-col">
+        <aside className="w-64 bg-gray-100 border-r border-gray-200 flex flex-col">
           <div className="p-6 font-semibold text-lg border-b border-gray-200">
             Account Settings
           </div>

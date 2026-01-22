@@ -35,15 +35,15 @@ function Property() {
         <TableCaption>List of Properties</TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-30">Property No.</TableHead>
-            <TableHead>Item ID</TableHead>
-            <TableHead>Acquisition Date</TableHead>
-            <TableHead>Acquisition ID</TableHead>
-            <TableHead>Acquisition Value</TableHead>
-            <TableHead>Personnel ID</TableHead>
-            <TableHead>Office ID</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className='w-30'>Actions</TableHead>
+            <TableHead className="w-30 font-semibold">Property No.</TableHead>
+            <TableHead className='font-semibold'>Item ID</TableHead>
+            <TableHead className='font-semibold'>Acquisition Date</TableHead>
+            <TableHead className='font-semibold'>Acquisition ID</TableHead>
+            <TableHead className='font-semibold'>Acquisition Value</TableHead>
+            <TableHead className='font-semibold'>Personnel ID</TableHead>
+            <TableHead className='font-semibold'>Office ID</TableHead>
+            <TableHead className='font-semibold'>Status</TableHead>
+            <TableHead className='w-30 font-semibold'>Actions</TableHead>
          
           </TableRow>
         </TableHeader>
