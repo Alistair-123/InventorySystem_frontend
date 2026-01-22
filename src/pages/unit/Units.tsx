@@ -32,6 +32,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import { toastSuccess, toastError } from "@/utils/toast";
 
 function Units() {
   const [isOpen, setIsOpen] = useState(false);
@@ -67,9 +68,10 @@ function Units() {
       setUnit(res.data.data ?? []);
       setTotalPages(res.data.pagination.totalPages);
     } catch (error) {
-      console.error(error);
-      setIsError(true);
-      setUnit([]);
+  console.error(error);
+  setIsError(true);
+  setUnit([]);
+  toastError("Failed to load units");
     } finally {
       setIsLoading(false);
     }
@@ -94,18 +96,24 @@ function Units() {
   });
 
   const onSubmit = async (data: CreateUnit) => {
-    if (mode === "edit") {
-      setPendingEditData(data);
-      setConfirmType("edit");
-      setConfirmOpen(true);
-      return;
-    }
+  if (mode === "edit") {
+    setPendingEditData(data);
+    setConfirmType("edit");
+    setConfirmOpen(true);
+    return;
+  }
 
+  try {
     await axiosInstance.post("/unit/createunit", data);
+    toastSuccess("Unit created successfully");
     reset();
     setIsOpen(false);
     fetchData();
-  };
+  } catch {
+    toastError("Failed to create unit");
+  }
+};
+
 
   const handleEdit = (unit: GetUnit) => {
     setMode("edit");
@@ -127,48 +135,55 @@ function Units() {
   };
 
   const handleConfirm = async () => {
-    if (!selectedUnit) return;
+  if (!selectedUnit) return;
 
-    try {
-      setIsProcessing(true);
+  try {
+    setIsProcessing(true);
 
-      if (confirmType === "delete") {
-        await axiosInstance.delete(`/unit/deleteunit/${selectedUnit._id}`);
-        fetchData();
-      }
-
-      setConfirmOpen(false);
-      setSelectedUnit(null);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsProcessing(false);
+    if (confirmType === "delete") {
+      await axiosInstance.delete(`/unit/deleteunit/${selectedUnit._id}`);
+      toastSuccess("Unit deleted successfully");
+      fetchData();
     }
-  };
+
+    setConfirmOpen(false);
+    setSelectedUnit(null);
+  } catch {
+    toastError("Failed to delete unit");
+  } finally {
+    setIsProcessing(false);
+  }
+};
+
 
   const confirmEdit = async () => {
-    if (!selectedUnit || !pendingEditData) return;
+  if (!selectedUnit || !pendingEditData) return;
 
-    try {
-      setIsProcessing(true);
+  try {
+    setIsProcessing(true);
 
-      await axiosInstance.put(
-        `/unit/updateunit/${selectedUnit._id}`,
-        pendingEditData
-      );
+    await axiosInstance.put(
+      `/unit/updateunit/${selectedUnit._id}`,
+      pendingEditData
+    );
 
-      setConfirmOpen(false);
-      setIsOpen(false);
-      setPendingEditData(null);
-      setSelectedUnit(null);
-      reset();
-      setMode("create");
+    toastSuccess("Unit updated successfully");
 
-      fetchData();
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+    setConfirmOpen(false);
+    setIsOpen(false);
+    setPendingEditData(null);
+    setSelectedUnit(null);
+    reset();
+    setMode("create");
+
+    fetchData();
+  } catch {
+    toastError("Failed to update unit");
+  } finally {
+    setIsProcessing(false);
+  }
+};
+
 
   return (
     <div className="font-poppins">
