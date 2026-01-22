@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { sidebarData } from "./Data";
-import { masterdataConfig, transactionsConfig, reportsConfig } from "./sidebarData";
+import {
+  masterdataConfig,
+  transactionsConfig,
+  reportsConfig,
+} from "./sidebarData";
 
 import DictLongLogo from "../assets/DictLongLogo.png";
 import SmallLogo from "../assets/logos.png";
@@ -30,10 +34,18 @@ function Sidebar() {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+  const [logoVisible, setLogoVisible] = useState(false);
+
+  /* LOGO FADE-IN ON LOGIN */
+  useEffect(() => {
+    const t = setTimeout(() => setLogoVisible(true), 150);
+    return () => clearTimeout(t);
+  }, []);
 
   const getSectionChildren = (sectionLabel: string): SidebarItem[] => {
     if (sectionLabel === "Master Data") return Object.values(masterdataConfig);
-    if (sectionLabel === "Transactions") return Object.values(transactionsConfig);
+    if (sectionLabel === "Transactions")
+      return Object.values(transactionsConfig);
     if (sectionLabel === "Reports") return Object.values(reportsConfig);
     return [];
   };
@@ -52,36 +64,41 @@ function Sidebar() {
 
   const toggleSection = (key: string) => {
     setOpenSections((prev) => {
-      const isCurrentlyOpen = prev[key];
       if (collapsed) {
         setCollapsed(false);
         return { [key]: true };
       }
-      return { ...prev, [key]: !isCurrentlyOpen };
+      return { ...prev, [key]: !prev[key] };
     });
   };
 
   return (
     <aside
-      className={`relative h-screen bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ease-in-out ${
-        collapsed ? "w-14" : "w-64"
-      }`}
+      className={`relative h-screen flex flex-col transition-all duration-300 ease-in-out
+      ${collapsed ? "w-14" : "w-64"}
+      bg-gray-100 border-r border-gray-300`}
       style={{ fontFamily: "'Poppins', sans-serif" }}
     >
       {/* EDGE TOGGLE */}
       <div
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute top-0 right-0 h-full w-2 cursor-ew-resize hover:bg-blue-100/40"
+        className="absolute top-0 right-0 h-full w-2 cursor-ew-resize hover:bg-blue-200/40"
       />
 
-      {/* LOGO TOGGLE */}
+      {/* LOGO */}
       <div
         onClick={() => setCollapsed(!collapsed)}
-        className="h-20 flex items-center justify-center border-b border-gray-200 cursor-pointer group"
+        className="h-20 flex items-center justify-center border-b border-gray-300 cursor-pointer group"
       >
         <img
           src={collapsed ? SmallLogo : DictLongLogo}
-          className={`transition-all duration-300 ${collapsed ? "h-10" : "h-16"} group-hover:scale-105`}
+          className={`
+            transition-all duration-500 ease-out
+            ${collapsed ? "h-10" : "h-18"}
+            ${logoVisible ? "opacity-100 translate-x-0.5" : "opacity-0 translate-x-0"}
+            group-hover:scale-105
+            drop-shadow-sm
+          `}
         />
       </div>
 
@@ -104,12 +121,14 @@ function Sidebar() {
                 className={({ isActive }) =>
                   `${baseNav} ${
                     isActive
-                      ? "bg-blue-50 text-blue-700 border-l-4 border-blue-600"
-                      : "text-gray-700 hover:bg-gray-50 hover:translate-x-1"
+                      ? "bg-blue-100 text-blue-800 border-l-4 border-blue-600 shadow-sm"
+                      : "text-gray-700 hover:bg-gray-100 hover:translate-x-1"
                   }`
                 }
               >
-                {iconSrc && <img src={iconSrc} className="w-5 h-5 opacity-80" />}
+                {iconSrc && (
+                  <img src={iconSrc} className="w-5 h-5 opacity-80" />
+                )}
                 {!collapsed && item.label}
               </NavLink>
             );
@@ -121,16 +140,23 @@ function Sidebar() {
               <button
                 onClick={() => toggleSection(key)}
                 className={`${baseNav} w-full justify-between ${
-                  isOpen ? "bg-blue-50 text-blue-700" : "text-gray-700 hover:bg-gray-50"
+                  isOpen
+                    ? "bg-blue-100 text-blue-800"
+                    : "text-gray-700 hover:bg-gray-100"
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  {iconSrc && <img src={iconSrc} className="w-5 h-5 opacity-80" />}
+                  {iconSrc && (
+                    <img src={iconSrc} className="w-5 h-5 opacity-80" />
+                  )}
                   {!collapsed && section.label}
                 </div>
+
                 {!collapsed && (
                   <svg
-                    className={`w-4 h-4 transition-transform duration-300 ${isOpen ? "rotate-90" : ""}`}
+                    className={`w-4 h-4 transition-transform duration-300 ${
+                      isOpen ? "rotate-90" : ""
+                    }`}
                     fill="none"
                     stroke="currentColor"
                     strokeWidth={2}
@@ -147,27 +173,23 @@ function Sidebar() {
                   isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
                 }`}
               >
-                <ul className="mt-1 ml-6 border-l border-gray-200 pl-3 space-y-1">
-                  {children.map((item) => {
-                    const Icon = (item as any).icon; // if using react-icons
-                    return (
-                      <NavLink
-                        key={item.url}
-                        to={item.url}
-                        end
-                        className={({ isActive }) =>
-                          `${baseNav} ${
-                            isActive
-                              ? "bg-blue-50 text-blue-700 font-medium"
-                              : "text-gray-600 hover:bg-gray-50 hover:translate-x-1"
-                          }`
-                        }
-                      >
-                        {Icon && <Icon size={16} className="opacity-80 mr-2" />}
-                        {!collapsed && item.label}
-                      </NavLink>
-                    );
-                  })}
+                <ul className="mt-1 ml-6 border-l border-gray-300 pl-3 space-y-1">
+                  {children.map((item) => (
+                    <NavLink
+                      key={item.url}
+                      to={item.url}
+                      end
+                      className={({ isActive }) =>
+                        `${baseNav} ${
+                          isActive
+                            ? "bg-blue-100 text-blue-800 font-medium"
+                            : "text-gray-600 hover:bg-gray-100 hover:translate-x-1"
+                        }`
+                      }
+                    >
+                      {!collapsed && item.label}
+                    </NavLink>
+                  ))}
                 </ul>
               </div>
             </div>
@@ -175,7 +197,10 @@ function Sidebar() {
         })}
       </nav>
 
-      <ProfileComponent collapsed={collapsed} onExpandSidebar={() => setCollapsed(false)} />
+      <ProfileComponent
+        collapsed={collapsed}
+        onExpandSidebar={() => setCollapsed(false)}
+      />
     </aside>
   );
 }

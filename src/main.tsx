@@ -2,6 +2,7 @@ import React from "react";
 import "./index.css";
 import ReactDOM from "react-dom/client";
 import App from "./App";
+import GlobalToaster from "./components/GlobalToaster";
 import {
   useQuery,
   useMutation,
@@ -18,6 +19,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
           <App />
+          <GlobalToaster />
       </AuthProvider>
     </QueryClientProvider>
     </BrowserRouter>
