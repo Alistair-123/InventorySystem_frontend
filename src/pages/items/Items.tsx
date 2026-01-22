@@ -4,9 +4,16 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import axiosInstance from "@/utils/axiosInstance";
-import { fetchReferenceData, createItem, fetchItems } from "./api/fetchedData";
+import {
+  fetchReferenceData,
+  createItem,
+  fetchItems,
+  updateItem,
+  deleteItem,
+} from "./api/fetchedData";
 import { MoreHorizontal } from "lucide-react";
 import type { Item } from "./types/types";
+import ConfirmAction from "@/components/ActionMenu";
 import type {
   CategoryRef,
   BrandRef,
@@ -47,16 +54,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { resolveImageUrl } from "../../utils/image";
+
 function Item() {
   const [isOpen, setIsOpen] = useState(false);
-  const [open, setOpen] = useState(false);
   const [categories, setCategories] = useState<CategoryRef[]>([]);
   const [brands, setBrands] = useState<BrandRef[]>([]);
   const [units, setUnits] = useState<UnitRef[]>([]);
   const [preview, setPreview] = useState<string | null>(null);
-  const [category, setCategory] = useState<MongoId>("");
-  const [brand, setBrand] = useState<MongoId>("");
-  const [unit, setUnit] = useState<MongoId>("");
   const [items, setItems] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -65,7 +69,17 @@ function Item() {
   const [limit] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");
-  
+
+  // Edit / confirm state
+  const [editingId, setEditingId] = useState<MongoId | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmType, setConfirmType] = useState<"delete" | "edit" | null>(null);
+  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+  const [pendingFormData, setPendingFormData] = useState<FormData | null>(
+    null
+  );
+  const [isProcessing, setIsProcessing] = useState(false);
+
   useEffect(() => {
     const loadReferenceData = async () => {
       try {
@@ -96,8 +110,8 @@ function Item() {
   });
 
   const onSubmit = async (values: CreateItemPayload) => {
+    // Build FormData
     const formData = new FormData();
-
     formData.append("itemName", values.itemName);
     formData.append("itemDescription", values.itemDescription ?? "");
     formData.append("category", values.category);
@@ -105,14 +119,33 @@ function Item() {
     formData.append("unit", values.unit);
     formData.append("uploadType", "itemsimage");
 
-    if (values.itemImage && values.itemImage.length > 0) {
+    if (values.itemImage && (values.itemImage as FileList).length > 0) {
       formData.append("itemImage", (values.itemImage as FileList)[0]);
     }
 
-    await createItem(formData);
+    if (editingId) {
+      // Edit flow: show confirm modal first, store FormData
+      setPendingFormData(formData);
+      setConfirmType("edit");
+      setConfirmOpen(true);
+      setSelectedItem(items.find((i) => i._id === editingId) ?? null);
+      return;
+    }
 
-    reset();
-    setIsOpen(false);
+    // Create new item immediately
+    try {
+      setIsProcessing(true);
+      await createItem(formData);
+      // refresh
+      await fetchData();
+      reset();
+      setPreview(null);
+      setIsOpen(false);
+    } catch (err) {
+      console.error("Create failed", err);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -127,44 +160,130 @@ function Item() {
   };
 
   const fetchData = async () => {
-  try {
-    setIsLoading(true);
-    setIsError(false);
+    try {
+      setIsLoading(true);
+      setIsError(false);
 
-    const res = await fetchItems({
-      page,
-      limit,
-      search: search.trim() || undefined
-    });
+      const res = await fetchItems({
+        page,
+        limit,
+        search: search.trim() || undefined,
+      });
 
-    setItems(res.data);
-    setTotalPages(res.pagination.totalPages);
-  } catch (error) {
-    console.error(error);
-    setIsError(true);
-  } finally {
-    setIsLoading(false);
-  }
-};
-
+      setItems(res.data);
+      setTotalPages(res.pagination.totalPages);
+    } catch (error) {
+      console.error(error);
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-  fetchData();
-}, [page, limit, search]);
-
-useEffect(() => {
-  const timeout = setTimeout(() => {
-    setPage(1);
     fetchData();
-  }, 400);
+  }, [page, limit, search]);
 
-  return () => clearTimeout(timeout);
-}, [search]);
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setPage(1);
+      fetchData();
+    }, 400);
 
+    return () => clearTimeout(timeout);
+  }, [search]);
 
-  const handleEdit = () => {};
+  /* ------------------ Edit / Delete handlers ------------------ */
 
-  const handleDeleteClick = () => {};
+  const handleEdit = (item: Item) => {
+    // Populate form with item data
+    setEditingId(item._id);
+    setSelectedItem(item);
+    setPreview(resolveImageUrl(item.itemImage) || null);
+
+    // set all fields
+    setValue("itemName", item.itemName);
+    setValue("itemDescription", item.itemDescription ?? "");
+    setValue("status", item.status ?? "active");
+    setValue("category", item.category?._id ?? "");
+    setValue("brand", item.brand?._id ?? "");
+    setValue("unit", item.unit?._id ?? "");
+    // Do NOT set file input value programmatically (browsers block). Leave itemImage blank unless user selects a new file.
+
+    setIsOpen(true);
+  };
+
+  const handleDeleteClick = (item: Item) => {
+    setSelectedItem(item);
+    setConfirmType("delete");
+    setConfirmOpen(true);
+  };
+
+  // Called when confirming deletion
+  const handleConfirm = async () => {
+    if (!selectedItem) return;
+
+    try {
+      setIsProcessing(true);
+      await deleteItem(selectedItem._id);
+      setConfirmOpen(false);
+      setSelectedItem(null);
+      // If currently editing this item, clear edit state
+      if (editingId === selectedItem._id) {
+        setEditingId(null);
+        reset();
+        setPreview(null);
+        setIsOpen(false);
+      }
+      await fetchData();
+    } catch (err) {
+      console.error("Delete failed", err);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Called when confirming edit/save
+  const confirmEdit = async () => {
+    if (!editingId || !pendingFormData) return;
+
+    try {
+      setIsProcessing(true);
+      await updateItem(editingId, pendingFormData);
+      setConfirmOpen(false);
+      setPendingFormData(null);
+      setEditingId(null);
+      setSelectedItem(null);
+      reset();
+      setPreview(null);
+      setIsOpen(false);
+      await fetchData();
+    } catch (err) {
+      console.error("Update failed", err);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Cancel handlers for confirm
+  const cancelConfirm = () => {
+    setConfirmOpen(false);
+    setConfirmType(null);
+    setPendingFormData(null);
+    // If user cancelled delete, keep selectedItem untouched for now; we clear it for safety:
+    setSelectedItem(null);
+  };
+
+  // If user clicks Cancel on form, clear editing state and form
+  const handleCancelForm = () => {
+    reset();
+    setPreview(null);
+    setIsOpen(false);
+    setEditingId(null);
+    setSelectedItem(null);
+    setPendingFormData(null);
+  };
+
   return (
     <div className="font-poppins">
       <Dashboardheader title="Item Management" />
@@ -173,12 +292,21 @@ useEffect(() => {
           type="text"
           placeholder="Search Items..."
           className="w-75 font-poppins"
-           onChange={(e) => {
+          onChange={(e) => {
             setSearch(e.target.value);
             setPage(1); // reset pagination on new search
           }}
         />
-        <Button className="cursor-pointer" onClick={() => setIsOpen(true)}>
+        <Button
+          className="cursor-pointer"
+          onClick={() => {
+            // open create modal
+            reset({ status: "active" });
+            setEditingId(null);
+            setPreview(null);
+            setIsOpen(true);
+          }}
+        >
           Add Item
         </Button>
       </div>
@@ -247,9 +375,7 @@ useEffect(() => {
                     {/* Item Image */}
                     <TableCell>
                       <img
-                        src={
-                          resolveImageUrl(item.itemImage) || "/image.png"
-                        }
+                        src={resolveImageUrl(item.itemImage) || "/image.png"}
                         alt={item.itemName}
                         className="w-15 h-15 rounded-md object-cover border"
                         loading="lazy"
@@ -298,56 +424,53 @@ useEffect(() => {
           </TableBody>
         </Table>
 
-              <div className="flex items-center justify-between px-8 py-4">
-  <span className="text-sm text-muted-foreground">
-    Page {page} of {totalPages}
-  </span>
+        <div className="flex items-center justify-between px-8 py-4">
+          <span className="text-sm text-muted-foreground">
+            Page {page} of {totalPages}
+          </span>
 
-  <div className="flex gap-2">
-    <Button
-      variant="outline"
-      size="sm"
-      disabled={page === 1}
-      onClick={() => setPage((p) => Math.max(1, p - 1))}
-    >
-      Previous
-    </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            >
+              Previous
+            </Button>
 
-    {Array.from({ length: totalPages }, (_, i) => i + 1)
-      .filter(p =>
-        p === 1 ||
-        p === totalPages ||
-        Math.abs(p - page) <= 1
-      )
-      .map((p) => (
-        <Button
-          key={p}
-          size="sm"
-          variant={p === page ? "default" : "outline"}
-          onClick={() => setPage(p)}
-        >
-          {p}
-        </Button>
-      ))}
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter(
+                (p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1
+              )
+              .map((p) => (
+                <Button
+                  key={p}
+                  size="sm"
+                  variant={p === page ? "default" : "outline"}
+                  onClick={() => setPage(p)}
+                >
+                  {p}
+                </Button>
+              ))}
 
-    <Button
-      variant="outline"
-      size="sm"
-      disabled={page === totalPages}
-      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-    >
-      Next
-    </Button>
-  </div>
-</div>
-
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === totalPages}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
       </div>
 
-      {/* -------------------------------------------- */}
+      {/* Create / Edit Modal */}
       <Modal
         isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        title="Create Item"
+        onClose={handleCancelForm}
+        title={editingId ? "Edit Item" : "Create Item"}
         className="max-w-none font-poppins h-[80%]"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="p-4 space-y-6">
@@ -457,10 +580,7 @@ useEffect(() => {
                     name="category"
                     rules={{ required: true }}
                     render={({ field }) => (
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
+                      <Select value={field.value} onValueChange={field.onChange}>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
@@ -484,10 +604,7 @@ useEffect(() => {
                     name="brand"
                     rules={{ required: true }}
                     render={({ field }) => (
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
+                      <Select value={field.value} onValueChange={field.onChange}>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select brand" />
                         </SelectTrigger>
@@ -511,16 +628,13 @@ useEffect(() => {
                     name="unit"
                     rules={{ required: true }}
                     render={({ field }) => (
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
+                      <Select value={field.value} onValueChange={field.onChange}>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select unit" />
                         </SelectTrigger>
                         <SelectContent>
                           {units.map((u) => (
-                            <SelectItem key={u._id} value={u._id}>
+                            <SelectItem key={u._1d} value={u._id}>
                               {u.unitName}
                             </SelectItem>
                           ))}
@@ -535,19 +649,40 @@ useEffect(() => {
 
           {/* ACTIONS */}
           <div className="flex justify-end gap-2 pt-6">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsOpen(false)}
-            >
+            <Button type="button" variant="outline" onClick={handleCancelForm}>
               Cancel
             </Button>
-            <Button type="submit">Save</Button>
+            <Button type="submit">{editingId ? "Save" : "Save"}</Button>
           </div>
         </form>
       </Modal>
 
-      {/* ------------------------------------------------- */}
+      {/* ConfirmAction for Delete / Edit */}
+      <ConfirmAction
+        open={confirmOpen}
+        type={confirmType ?? undefined}
+        title={confirmType === "delete" ? "Confirm Deletion" : "Confirm Changes"}
+        description={
+          confirmType === "delete" ? (
+            <>
+              Are you sure you want to delete{" "}
+              <span className="font-semibold text-red-500">
+                {selectedItem?.itemName}
+              </span>
+              ? This action cannot be undone.
+            </>
+          ) : (
+            <>
+              Are you sure you want to save changes to{" "}
+              <span className="font-semibold">{selectedItem?.itemName}</span>?
+            </>
+          )
+        }
+        confirmText={confirmType === "delete" ? "Delete" : "Confirm"}
+        isLoading={isProcessing}
+        onConfirm={confirmType === "delete" ? handleConfirm : confirmEdit}
+        onCancel={cancelConfirm}
+      />
     </div>
   );
 }
