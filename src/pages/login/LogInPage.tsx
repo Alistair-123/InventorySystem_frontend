@@ -100,7 +100,7 @@ const handleMouseMove = (e: React.MouseEvent) => {
         alt=""
         className="
         w-[800px]
-        opacity-10
+        opacity-15
         grayscale
         animate-[slowSpin_90s_linear_infinite]
       "
@@ -141,7 +141,7 @@ const handleMouseMove = (e: React.MouseEvent) => {
 
         <div className="flex-1 flex items-center justify-center"
         style={{ fontFamily: "'Poppins', sans-serif" }}>
-          <Card className="w-full max-w-md rounded-2xl shadow-x1 backdrop-blur-[5px] bg-transparent border border-gray/30 p-8">
+          <Card className="w-full max-w-md rounded-2xl shadow-x1 backdrop-blur-[10px] bg-transparent border border-gray p-7">
             <form
               onSubmit={handleSubmit(onSubmit)}
               className="flex flex-col gap-6 animate-[slideUp_0.6s_ease]"
