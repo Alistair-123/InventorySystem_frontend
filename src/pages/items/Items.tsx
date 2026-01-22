@@ -23,9 +23,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  TableCell
+  TableCell,
 } from "@/components/ui/table";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import {
   Accordion,
   AccordionContent,
@@ -41,7 +46,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { resolveImageUrl } from "../../utils/image"
+import { resolveImageUrl } from "../../utils/image";
 function Item() {
   const [isOpen, setIsOpen] = useState(false);
   const [open, setOpen] = useState(false);
@@ -59,6 +64,8 @@ function Item() {
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
+  const [search, setSearch] = useState("");
+  
   useEffect(() => {
     const loadReferenceData = async () => {
       try {
@@ -80,7 +87,7 @@ function Item() {
     handleSubmit,
     control,
     reset,
-     setValue,
+    setValue,
     formState: { errors },
   } = useForm<CreateItemPayload>({
     defaultValues: {
@@ -98,10 +105,9 @@ function Item() {
     formData.append("unit", values.unit);
     formData.append("uploadType", "itemsimage");
 
-
     if (values.itemImage && values.itemImage.length > 0) {
-  formData.append("itemImage", (values.itemImage as FileList)[0]);
-}
+      formData.append("itemImage", (values.itemImage as FileList)[0]);
+    }
 
     await createItem(formData);
 
@@ -110,22 +116,27 @@ function Item() {
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0];
+    const file = e.target.files?.[0];
 
-  if (file) {
-    setPreview(URL.createObjectURL(file));
-    setValue("itemImage", e.target.files as FileList, {
-      shouldValidate: true,
-    });
-  }
-};
+    if (file) {
+      setPreview(URL.createObjectURL(file));
+      setValue("itemImage", e.target.files as FileList, {
+        shouldValidate: true,
+      });
+    }
+  };
 
   const fetchData = async () => {
   try {
     setIsLoading(true);
     setIsError(false);
 
-    const res = await fetchItems({ page, limit });
+    const res = await fetchItems({
+      page,
+      limit,
+      search: search.trim() || undefined
+    });
+
     setItems(res.data);
     setTotalPages(res.pagination.totalPages);
   } catch (error) {
@@ -136,17 +147,24 @@ function Item() {
   }
 };
 
-useEffect(() => {
+
+  useEffect(() => {
   fetchData();
-}, [page, limit]);
+}, [page, limit, search]);
 
-const handleEdit = () => {
+useEffect(() => {
+  const timeout = setTimeout(() => {
+    setPage(1);
+    fetchData();
+  }, 400);
 
-}
+  return () => clearTimeout(timeout);
+}, [search]);
 
-const handleDeleteClick = () => {
 
-}
+  const handleEdit = () => {};
+
+  const handleDeleteClick = () => {};
   return (
     <div className="font-poppins">
       <Dashboardheader title="Item Management" />
@@ -155,6 +173,10 @@ const handleDeleteClick = () => {
           type="text"
           placeholder="Search Items..."
           className="w-75 font-poppins"
+           onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1); // reset pagination on new search
+          }}
         />
         <Button className="cursor-pointer" onClick={() => setIsOpen(true)}>
           Add Item
@@ -162,117 +184,162 @@ const handleDeleteClick = () => {
       </div>
 
       <div className="p-8">
-          <Table className="p-4">
-  <TableCaption>List of Items</TableCaption>
+        <Table className="p-4">
+          <TableCaption>List of Items</TableCaption>
 
-  <TableHeader>
-    <TableRow>
-      <TableHead>#</TableHead>
-      <TableHead>Item Image</TableHead>
-      <TableHead className="w-30">Item ID</TableHead>
-      <TableHead>Item Name</TableHead>
-      <TableHead>Item Description</TableHead>
-      <TableHead>Category Name</TableHead>
-      <TableHead>Brand Name</TableHead>
-      <TableHead>Unit Name</TableHead>
-      <TableHead className="w-30">Actions</TableHead>
-    </TableRow>
-  </TableHeader>
+          <TableHeader>
+            <TableRow>
+              <TableHead>#</TableHead>
+              <TableHead>Item Image</TableHead>
+              <TableHead className="w-30">Item ID</TableHead>
+              <TableHead>Item Name</TableHead>
+              <TableHead>Item Description</TableHead>
+              <TableHead>Category Name</TableHead>
+              <TableHead>Brand Name</TableHead>
+              <TableHead>Unit Name</TableHead>
+              <TableHead className="w-30">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
 
-  <TableBody>
-    {/* Loading */}
-    {isLoading && (
-      <TableRow>
-        <TableCell colSpan={9} className="text-center">
-          Loading items...
-        </TableCell>
-      </TableRow>
-    )}
+          <TableBody>
+            {/* Loading */}
+            {isLoading && (
+              <TableRow>
+                <TableCell colSpan={9} className="text-center">
+                  Loading items...
+                </TableCell>
+              </TableRow>
+            )}
 
-    {/* Error */}
-    {isError && !isLoading && (
-      <TableRow>
-        <TableCell colSpan={9} className="text-center text-red-500">
-          Failed to load items.
-          <Button variant="link" className="ml-2" onClick={fetchData}>
-            Retry
-          </Button>
-        </TableCell>
-      </TableRow>
-    )}
-
-    {/* Empty */}
-    {!isLoading && !isError && items.length === 0 && (
-      <TableRow>
-        <TableCell colSpan={9} className="text-center text-red-400">
-          No items found
-        </TableCell>
-      </TableRow>
-    )}
-
-    {/* Data */}
-    {!isLoading &&
-      !isError &&
-      items.map((item, index) => {
-        const rowNumber = (page - 1) * limit + index + 1;
-
-        return (
-          <TableRow key={item._id}>
-            <TableCell className="text-muted-foreground">
-              {rowNumber}
-            </TableCell>
-
-            {/* Item Image */}
-            <TableCell>
-              <img
-                src={resolveImageUrl(item.itemImage) || "/placeholder.png"}
-                alt={item.itemName}
-                className="w-15 h-15 rounded-md object-cover border"
-                loading="lazy"
-                onError={(e) => {
-                  e.currentTarget.src = "/placeholder.png";
-                }}
-              />
-            </TableCell>
-
-            <TableCell>{item.itemId}</TableCell>
-            <TableCell>{item.itemName}</TableCell>
-            <TableCell className="max-w-[200px] truncate">
-              {item.itemDescription || "—"}
-            </TableCell>
-
-            <TableCell>{item.category?.categoryName}</TableCell>
-            <TableCell>{item.brand?.brandName}</TableCell>
-            <TableCell>{item.unit?.unitName}</TableCell>
-
-            {/* Actions */}
-            <TableCell className="text-right pr-15">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <MoreHorizontal className="h-4 w-4" />
+            {/* Error */}
+            {isError && !isLoading && (
+              <TableRow>
+                <TableCell colSpan={9} className="text-center text-red-500">
+                  Failed to load items.
+                  <Button variant="link" className="ml-2" onClick={fetchData}>
+                    Retry
                   </Button>
-                </DropdownMenuTrigger>
+                </TableCell>
+              </TableRow>
+            )}
 
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => handleEdit(item)}>
-                    Edit
-                  </DropdownMenuItem>
+            {/* Empty */}
+            {!isLoading && !isError && items.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={9} className="text-center text-red-400">
+                  No items found
+                </TableCell>
+              </TableRow>
+            )}
 
-                  <DropdownMenuItem
-                    className="text-red-500 focus:text-red-500"
-                    onClick={() => handleDeleteClick(item)}
-                  >
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </TableCell>
-          </TableRow>
-        );
-      })}
-  </TableBody>
-</Table>
+            {/* Data */}
+            {!isLoading &&
+              !isError &&
+              items.map((item, index) => {
+                const rowNumber = (page - 1) * limit + index + 1;
+
+                return (
+                  <TableRow key={item._id}>
+                    <TableCell className="text-muted-foreground">
+                      {rowNumber}
+                    </TableCell>
+
+                    {/* Item Image */}
+                    <TableCell>
+                      <img
+                        src={
+                          resolveImageUrl(item.itemImage) || "/image.png"
+                        }
+                        alt={item.itemName}
+                        className="w-15 h-15 rounded-md object-cover border"
+                        loading="lazy"
+                        onError={(e) => {
+                          e.currentTarget.src = "/image.png";
+                        }}
+                      />
+                    </TableCell>
+
+                    <TableCell>{item.itemId}</TableCell>
+                    <TableCell>{item.itemName}</TableCell>
+                    <TableCell className="max-w-[200px] truncate">
+                      {item.itemDescription || "—"}
+                    </TableCell>
+
+                    <TableCell>{item.category?.categoryName}</TableCell>
+                    <TableCell>{item.brand?.brandName}</TableCell>
+                    <TableCell>{item.unit?.unitName}</TableCell>
+
+                    {/* Actions */}
+                    <TableCell className="text-right pr-15">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEdit(item)}>
+                            Edit
+                          </DropdownMenuItem>
+
+                          <DropdownMenuItem
+                            className="text-red-500 focus:text-red-500"
+                            onClick={() => handleDeleteClick(item)}
+                          >
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+          </TableBody>
+        </Table>
+
+              <div className="flex items-center justify-between px-8 py-4">
+  <span className="text-sm text-muted-foreground">
+    Page {page} of {totalPages}
+  </span>
+
+  <div className="flex gap-2">
+    <Button
+      variant="outline"
+      size="sm"
+      disabled={page === 1}
+      onClick={() => setPage((p) => Math.max(1, p - 1))}
+    >
+      Previous
+    </Button>
+
+    {Array.from({ length: totalPages }, (_, i) => i + 1)
+      .filter(p =>
+        p === 1 ||
+        p === totalPages ||
+        Math.abs(p - page) <= 1
+      )
+      .map((p) => (
+        <Button
+          key={p}
+          size="sm"
+          variant={p === page ? "default" : "outline"}
+          onClick={() => setPage(p)}
+        >
+          {p}
+        </Button>
+      ))}
+
+    <Button
+      variant="outline"
+      size="sm"
+      disabled={page === totalPages}
+      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+    >
+      Next
+    </Button>
+  </div>
+</div>
 
       </div>
 
@@ -287,38 +354,38 @@ const handleDeleteClick = () => {
           {/* ITEM IMAGE */}
           <div className="flex gap-4">
             <Label className="pr-17">Item Image</Label>
-                <Controller
-                name="itemImage"
-                control={control}
-                render={({ field }) => (
-                  <label className="cursor-pointer">
-                    {preview ? (
-                      <img
-                        src={preview}
-                        className="w-30 h-30 rounded-full object-cover border"
-                      />
-                    ) : (
-                      <div className="w-30 h-30 rounded-full border flex items-center justify-center">
-                        Select Image
-                      </div>
-                    )}
-
-                    <Input
-                      name="itemImage" 
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const files = e.target.files;
-                        if (!files) return;
-                        field.onChange(files);
-                        setPreview(URL.createObjectURL(files[0]));
-                      }}
+            <Controller
+              name="itemImage"
+              control={control}
+              render={({ field }) => (
+                <label className="cursor-pointer">
+                  {preview ? (
+                    <img
+                      src={preview}
+                      className="w-30 h-30 rounded-full object-cover border"
                     />
-                  </label>
-                )}
-              />
-</div>
+                  ) : (
+                    <div className="w-30 h-30 rounded-full border flex items-center justify-center">
+                      Select Image
+                    </div>
+                  )}
+
+                  <Input
+                    name="itemImage"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const files = e.target.files;
+                      if (!files) return;
+                      field.onChange(files);
+                      setPreview(URL.createObjectURL(files[0]));
+                    }}
+                  />
+                </label>
+              )}
+            />
+          </div>
 
           <div className="flex gap-4">
             {/* ITEM NAME */}
@@ -341,8 +408,14 @@ const handleDeleteClick = () => {
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="active"><span className="h-2 w-2 rounded-full bg-green-500"></span>Active</SelectItem>
-                      <SelectItem value="inactive"><span className="h-2 w-2 rounded-full bg-red-500" />Inactive</SelectItem>
+                      <SelectItem value="active">
+                        <span className="h-2 w-2 rounded-full bg-green-500"></span>
+                        Active
+                      </SelectItem>
+                      <SelectItem value="inactive">
+                        <span className="h-2 w-2 rounded-full bg-red-500" />
+                        Inactive
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 )}
@@ -368,7 +441,6 @@ const handleDeleteClick = () => {
               )}
             />
           </div>
-
 
           <Accordion type="single" collapsible>
             <AccordionItem value="item-1">
