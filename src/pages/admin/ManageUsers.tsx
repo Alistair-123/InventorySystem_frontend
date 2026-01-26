@@ -73,7 +73,7 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ onClose }) => {
         </aside>
 
         {/* Content */}
-        <main className="flex-1 p-8 overflow-y-auto bg-gray-50">
+        <main className="flex-1 p-6 overflow-y-auto ">
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-semibold text-gray-900">
@@ -152,7 +152,15 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ onClose }) => {
           {/* ADD PERSONNEL */}
           {view === "add" && (
             <div>
-              <AddPersonnel onCancel={() => setView("manage")} />
+              <AddPersonnel
+                onCancel={() => setView("manage")}
+                onAddPersonnel={(personnel) => {
+                  // update local state / refetch list
+                  console.log("Added personnel:", personnel);
+                  setView("manage");
+                }}
+              />
+
             </div>
           )}
 

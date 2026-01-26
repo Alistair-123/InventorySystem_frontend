@@ -15,7 +15,7 @@ export const FormInput = ({ label, placeholder }: Props) => (
         bg-white
         text-gray-800
         focus:outline-none
-        focus:ring-2 focus:ring-blue-500
+        focus:ring-2 focus:ring-gray-500
       "
     />
   </div>
