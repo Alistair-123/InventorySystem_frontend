@@ -1,6 +1,7 @@
 export type Role = 'admin' | 'user';
 
 export type Personnel = {
+  image?: string | null;
   id: string;
   personnelId: string;
   firstName: string;
