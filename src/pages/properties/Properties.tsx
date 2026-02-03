@@ -71,13 +71,6 @@ function Property() {
 const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
 
-// const { watch } = useForm<CreatePropertyForm>(...);
-
-// const watchedItem = watch("item");
-// const watchedAcquisitionType = watch("acquisitionType");
-// const watchedPersonnel = watch("personnel");
-// const watchedOffice = watch("office");
-// const watchedStatus = watch("status");
 
   const handleEdit = async (property: Property) => {
   setEditingId(property._id);
@@ -100,12 +93,21 @@ const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
     handleSubmit,
     setValue,
     reset,
+     watch,
     formState: { isSubmitting },
   } = useForm<CreatePropertyForm>({
     defaultValues: {
       status: "serviceable",
     },
   });
+
+
+
+const watchedItem = watch("item");
+const watchedAcquisitionType = watch("acquisitionType");
+const watchedPersonnel = watch("personnel");
+const watchedOffice = watch("office");
+const watchedStatus = watch("status");
 
   /* ----------------------------
      LOAD SELECT OPTIONS
@@ -374,7 +376,7 @@ const confirmDelete = async () => {
             {/* Item */}
             <div className="flex items-center gap-4">
               <Label className="w-40">Item</Label>
-              <Select onValueChange={(v) => setValue("item", v)}>
+              <Select  value={watchedItem} onValueChange={(v) => setValue("item", v)}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select item" />
                 </SelectTrigger>
@@ -400,7 +402,7 @@ const confirmDelete = async () => {
             {/* Acquisition Type */}
             <div className="flex items-center gap-4">
               <Label className="w-40">Acquisition Type</Label>
-              <Select onValueChange={(v) => setValue("acquisitionType", v)}>
+              <Select  value={watchedAcquisitionType} onValueChange={(v) => setValue("acquisitionType", v)}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select acquisition type" />
                 </SelectTrigger>
@@ -429,7 +431,7 @@ const confirmDelete = async () => {
             {/* Personnel */}
             <div className="flex items-center gap-4">
               <Label className="w-40">Personnel</Label>
-              <Select onValueChange={(v) => setValue("personnel", v)}>
+              <Select   value={watchedPersonnel} onValueChange={(v) => setValue("personnel", v)}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select personnel" />
                 </SelectTrigger>
@@ -446,7 +448,7 @@ const confirmDelete = async () => {
             {/* Office */}
             <div className="flex items-center gap-4">
               <Label className="w-40">Office</Label>
-              <Select onValueChange={(v) => setValue("office", v)}>
+              <Select value={watchedOffice} onValueChange={(v) => setValue("office", v)}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select office" />
                 </SelectTrigger>
@@ -464,7 +466,7 @@ const confirmDelete = async () => {
             <div className="flex items-center gap-4">
               <Label className="w-40">Status</Label>
               <Select
-                defaultValue="serviceable"
+                value={watchedStatus}
                 onValueChange={(v) => setValue("status", v as PropertyStatus)}
               >
                 <SelectTrigger className="w-full">
