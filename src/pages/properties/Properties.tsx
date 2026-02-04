@@ -39,6 +39,7 @@ import {
   deleteProperty,   // ❗ missing
 } from "./fetchdata";
 import ConfirmAction from "@/components/ActionMenu";
+import { toast } from "react-toastify";
 
 /* ============================
    FORM TYPE
@@ -122,17 +123,25 @@ const watchedStatus = watch("status");
      SUBMIT
   ----------------------------- */
  const onSubmit = async (data: CreatePropertyForm) => {
-  if (editingId) {
-    await updateProperty(editingId, data);
-  } else {
-    await createProperty(data);
-  }
+  try {
+    if (editingId) {
+      await updateProperty(editingId, data);
+      toast.success("Property updated successfully");
+    } else {
+      await createProperty(data);
+      toast.success("Property created successfully");
+    }
 
-  reset();
-  setEditingId(null);
-  setIsOpen(false);
-  fetchData();
+    reset();
+    setEditingId(null);
+    setIsOpen(false);
+    fetchData();
+  } catch (error) {
+    toast.error("Something went wrong");
+  }
 };
+
+
 
   const handleDeleteClick = (property: Property) => {
   setSelectedProperty(property);
@@ -142,12 +151,19 @@ const watchedStatus = watch("status");
 const confirmDelete = async () => {
   if (!selectedProperty) return;
 
-  await deleteProperty(selectedProperty._id);
-
-  setIsDeleteOpen(false);
-  setSelectedProperty(null);
-  fetchData();
+  try {
+    await deleteProperty(selectedProperty._id);
+    toast.success("Property deleted");
+    fetchData();
+  } catch {
+    toast.error("Failed to delete property");
+  } finally {
+    setIsDeleteOpen(false);
+    setSelectedProperty(null);
+  }
 };
+
+
 
   useEffect(() => {
     const handler = setTimeout(() => {

@@ -12,7 +12,7 @@ import Office from "./pages/office/Office";
 import Acquisitions from "./pages/acquisitions/Acquisitions";
 import Items from "./pages/items/Items";
 import Properties from "./pages/properties/Properties";
-import AdjustmentRecords from "./pages/adjustment records/AdjustmentRecords";
+import AdjustmentReports from "./pages/adjustment reports/AdjustmentReports";
 import InventorySummary from "./pages/inventory summary/InventorySummary";
 import PropertyStatus from "./pages/property status/PropertyStatus";
 import PropertiesPerPersonnel from "./pages/properties per personnel/PropertiesPerPersonnel";
@@ -46,7 +46,7 @@ function AppWrapper() {
           <Route path="/acquisitions" element={<Acquisitions />} />
           <Route path="/items" element={<Items />} />
           <Route path="/properties" element={<Properties />} />
-          <Route path="/adjustment-records" element={<AdjustmentRecords />} />
+          <Route path="/adjustment-reports" element={<AdjustmentReports />} />
           <Route path="/admin/add-personnel" element={<AddPersonnel onCancel={() => window.history.back()} />} />
           {/* Reports */}
           <Route path="/reports/inventory-summary" element={<InventorySummary />} />

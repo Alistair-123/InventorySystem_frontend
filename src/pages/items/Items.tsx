@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import Dashboardheader from "@/components/Dashboardheader";
 import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
@@ -54,6 +55,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { resolveImageUrl } from "../../utils/image";
+import { toast } from "react-toastify";
 
 function Item() {
   const [isOpen, setIsOpen] = useState(false);
@@ -134,18 +136,22 @@ function Item() {
 
     // Create new item immediately
     try {
-      setIsProcessing(true);
-      await createItem(formData);
-      // refresh
-      await fetchData();
-      reset();
-      setPreview(null);
-      setIsOpen(false);
-    } catch (err) {
-      console.error("Create failed", err);
-    } finally {
-      setIsProcessing(false);
-    }
+  setIsProcessing(true);
+  await createItem(formData);
+
+  toast.success("Item created successfully");
+
+  await fetchData();
+  reset();
+  setPreview(null);
+  setIsOpen(false);
+} catch (err) {
+  console.error("Create failed", err);
+  toast.error("Failed to create item");
+} finally {
+  setIsProcessing(false);
+}
+
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -173,8 +179,9 @@ function Item() {
       setItems(res.data);
       setTotalPages(res.pagination.totalPages);
     } catch (error) {
-      console.error(error);
-      setIsError(true);
+  console.error(error);
+  setIsError(true);
+  toast.error("Failed to load items");
     } finally {
       setIsLoading(false);
     }
@@ -221,49 +228,60 @@ function Item() {
 
   // Called when confirming deletion
   const handleConfirm = async () => {
-    if (!selectedItem) return;
+  if (!selectedItem) return;
 
-    try {
-      setIsProcessing(true);
-      await deleteItem(selectedItem._id);
-      setConfirmOpen(false);
-      setSelectedItem(null);
-      // If currently editing this item, clear edit state
-      if (editingId === selectedItem._id) {
-        setEditingId(null);
-        reset();
-        setPreview(null);
-        setIsOpen(false);
-      }
-      await fetchData();
-    } catch (err) {
-      console.error("Delete failed", err);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+  try {
+    setIsProcessing(true);
+    await deleteItem(selectedItem._id);
 
-  // Called when confirming edit/save
-  const confirmEdit = async () => {
-    if (!editingId || !pendingFormData) return;
+    toast.success("Item deleted successfully");
 
-    try {
-      setIsProcessing(true);
-      await updateItem(editingId, pendingFormData);
-      setConfirmOpen(false);
-      setPendingFormData(null);
+    setConfirmOpen(false);
+    setSelectedItem(null);
+
+    if (editingId === selectedItem._id) {
       setEditingId(null);
-      setSelectedItem(null);
       reset();
       setPreview(null);
       setIsOpen(false);
-      await fetchData();
-    } catch (err) {
-      console.error("Update failed", err);
-    } finally {
-      setIsProcessing(false);
     }
-  };
+
+    await fetchData();
+  } catch (err) {
+    console.error("Delete failed", err);
+    toast.error("Failed to delete item");
+  } finally {
+    setIsProcessing(false);
+  }
+};
+
+
+  // Called when confirming edit/save
+  const confirmEdit = async () => {
+  if (!editingId || !pendingFormData) return;
+
+  try {
+    setIsProcessing(true);
+    await updateItem(editingId, pendingFormData);
+
+    toast.success("Item updated successfully");
+
+    setConfirmOpen(false);
+    setPendingFormData(null);
+    setEditingId(null);
+    setSelectedItem(null);
+    reset();
+    setPreview(null);
+    setIsOpen(false);
+    await fetchData();
+  } catch (err) {
+    console.error("Update failed", err);
+    toast.error("Failed to update item");
+  } finally {
+    setIsProcessing(false);
+  }
+};
+
 
   // Cancel handlers for confirm
   const cancelConfirm = () => {

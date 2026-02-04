@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/UseAuth";
@@ -71,11 +72,13 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({
         onClick={handleProfileClick}
         className={`
           w-full flex items-center rounded-lg px-2 py-2
-          hover:bg-gray-100 transition-all duration-150
-          active:scale-[0.97]
+          transition-all duration-200
+          hover:bg-gray-100
+          active:scale-95
           ${collapsed ? "justify-center" : "gap-2"}
         `}
       >
+
         {/* AVATAR */}
           <img
             src={resolveImageUrl(user?.image)}
@@ -85,7 +88,6 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({
               e.currentTarget.src = "/default-avatar.png";
             }}
           />
-
 
         {/* NAME + ROLE */}
         <div
