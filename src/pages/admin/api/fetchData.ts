@@ -69,3 +69,13 @@ export const updatePersonnel = async (
 export const deletePersonnel = async (id: string): Promise<void> => {
   await axiosInstance.delete(`/personnel/deletepersonnel/${id}`);
 };
+
+export const fetchPersonnelById = async (
+  id: string
+): Promise<Personnel> => {
+  const { data } = await axiosInstance.get<Personnel>(
+    `/personnel/getpersonnel/${id}`
+  );
+
+  return data;
+};
