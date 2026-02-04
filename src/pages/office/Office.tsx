@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import axiosInstance from "@/utils/axiosInstance";
-import type { CreateOffice, GetOffice } from './types/types';
+import type { CreateOffice, GetOffice, Property } from './types/types';
 import {
   DropdownMenu,
   DropdownMenuTrigger,

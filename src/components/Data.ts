@@ -35,9 +35,9 @@ export const sidebarData = {
   adjustments: {
     label: "Adjustments",
     items: {
-      adjustmentsRecords: {
-        label: "Adjustment Records",
-        url: "/adjustment-records",
+      adjustmentReports: {
+        label: "Adjustment Reports",
+        url: "/adjustment-reports",
       },
     },
   },

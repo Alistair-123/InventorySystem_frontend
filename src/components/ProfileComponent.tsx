@@ -4,7 +4,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/UseAuth";
 import { FiUser, FiShield, FiLogOut } from "react-icons/fi";
 import { resolveImageUrl } from "@/utils/image";
-
 type ProfileComponentProps = {
   collapsed: boolean;
   onExpandSidebar?: () => void;
@@ -84,14 +83,7 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({
           <img
             src={resolveImageUrl(user?.image)}
             alt="Profile"
-            className={`
-              h-10 w-10 min-h-[40px] min-w-[40px]
-              rounded-full object-cover
-              transition-all duration-200
-              ring-2 ring-transparent
-              hover:ring-blue-500 hover:ring-offset-2
-              active:scale-95
-            `}
+            className="h-10 w-10 rounded-full object-cover"
             onError={(e) => {
               e.currentTarget.src = "/default-avatar.png";
             }}
