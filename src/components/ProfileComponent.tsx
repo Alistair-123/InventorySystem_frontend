@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/UseAuth";
 import { FiUser, FiShield, FiLogOut } from "react-icons/fi";
+import { resolveImageUrl } from "@/utils/image";
 
 type ProfileComponentProps = {
   collapsed: boolean;
@@ -59,6 +61,7 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({
     navigate(path, { state: { background: location } }); // mark current page as background
     setProfileOpen(false); // close dropdown
   };
+  console.log("IMAGE FROM API:", user?.image);
 
   return (
     <div
@@ -70,15 +73,29 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({
         onClick={handleProfileClick}
         className={`
           w-full flex items-center rounded-lg px-2 py-2
-          hover:bg-gray-100 transition-all duration-150
-          active:scale-[0.97]
+          transition-all duration-200
+          hover:bg-gray-100
+          active:scale-95
           ${collapsed ? "justify-center" : "gap-2"}
         `}
       >
+
         {/* AVATAR */}
-        <div className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-semibold">
-          {initials}
-        </div>
+          <img
+            src={resolveImageUrl(user?.image)}
+            alt="Profile"
+            className={`
+              h-10 w-10 min-h-[40px] min-w-[40px]
+              rounded-full object-cover
+              transition-all duration-200
+              ring-2 ring-transparent
+              hover:ring-blue-500 hover:ring-offset-2
+              active:scale-95
+            `}
+            onError={(e) => {
+              e.currentTarget.src = "/default-avatar.png";
+            }}
+          />
 
         {/* NAME + ROLE */}
         <div
@@ -97,9 +114,8 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({
         {/* CHEVRON */}
         {!collapsed && (
           <svg
-            className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
-              profileOpen ? "rotate-180" : ""
-            }`}
+            className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${profileOpen ? "rotate-180" : ""
+              }`}
             fill="none"
             stroke="currentColor"
             strokeWidth={2}
@@ -123,7 +139,17 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({
         {/* USER INFO */}
         <div className="flex items-center gap-3 px-3 py-2">
           <div className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-semibold">
-            {initials}
+
+            <img
+              src={resolveImageUrl(user?.image)}
+              alt="Profile"
+              className="h-10 w-10 rounded-full object-cover"
+              onError={(e) => {
+                e.currentTarget.src = "/default-avatar.png";
+              }}
+            />
+
+
           </div>
 
           <div className="min-w-0 leading-tight text-left">
