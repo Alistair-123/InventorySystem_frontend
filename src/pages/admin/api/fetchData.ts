@@ -4,14 +4,18 @@ import type {
   Personnel,
   CreatePersonnelPayload,
   UpdatePersonnelPayload,
+  ApiResponse
 } from '../types/types';
 
 /**
  * GET all personnel
  */
 export const fetchPersonnel = async (): Promise<Personnel[]> => {
-  const { data } = await axiosInstance.get("/personnel/getpersonnel");
-  return data;
+  const response = await axiosInstance.get<ApiResponse<Personnel[]>>(
+    "/personnel/getpersonnel"
+  );
+
+  return response.data.data;
 };
 
 /**
