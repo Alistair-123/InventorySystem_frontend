@@ -1,5 +1,3 @@
-// types/personnel.ts
-
 export type PersonnelType = "plantilla" | "jobOrder";
 export type PersonnelStatus = "active" | "inactive";
 export type PersonnelRole = "admin" | "user";
