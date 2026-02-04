@@ -71,23 +71,8 @@ function Property() {
   const [editingId, setEditingId] = useState<string | null>(null);
 const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+const [pendingEdit, setPendingEdit] = useState<Property | null>(null);
 
-
-  const handleEdit = async (property: Property) => {
-  setEditingId(property._id);
-  setIsOpen(true);
-
-  reset({
-    propertyNo: property.propertyNo,
-    item: property.item._id,
-    acquisitionDate: property.acquisitionDate.slice(0, 10),
-    acquisitionType: property.acquisitionType._id,
-    acquisitionValue: property.acquisitionValue,
-    personnel: property.personnel._id,
-    office: property.office._id,
-    status: property.status,
-  });
-};
 
   const {
     register,
@@ -101,6 +86,34 @@ const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
       status: "serviceable",
     },
   });
+
+  const handleEdit = (property: Property) => {
+  setEditingId(property._id);
+  setPendingEdit(property);
+  setIsOpen(true);
+};
+
+
+  useEffect(() => {
+  if (!options || !pendingEdit) return;
+
+  reset({
+  propertyNo: pendingEdit.propertyNo,
+  item: pendingEdit.item?._id ?? "",
+  acquisitionDate: pendingEdit.acquisitionDate.slice(0, 10),
+  acquisitionType: pendingEdit.acquisitionType?._id ?? "",
+  acquisitionValue: pendingEdit.acquisitionValue,
+  personnel: pendingEdit.personnel?._id ?? "",
+  office: pendingEdit.office?._id ?? "",
+  status: pendingEdit.status,
+});
+
+
+  setPendingEdit(null);
+}, [options, pendingEdit, reset]);
+
+
+
 
 
 
