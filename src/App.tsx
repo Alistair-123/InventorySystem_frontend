@@ -19,7 +19,7 @@ import PropertiesPerPersonnel from "./pages/properties per personnel/PropertiesP
 import PropertiesPerCategory from "./pages/properties per category/PropertiesPerCategory";
 import PropertiesPerItem from "./pages/properties per item/PropertiesPerItem";
 import AddPersonnel from "./pages/admin/AddPersonnel";
-
+import PersonnelProperties from './pages/properties per personnel/PersonnelProperties';
 // Modals
 import Account from "./pages/account/Account";
 import Manage from "./pages/admin/ManageUsers";
@@ -54,6 +54,10 @@ function AppWrapper() {
           <Route path="/reports/properties-per-category" element={<PropertiesPerCategory />} />
           <Route path="/reports/properties-per-item" element={<PropertiesPerItem />} />
           <Route path="/reports/properties-per-personnel" element={<PropertiesPerPersonnel />} />
+          <Route
+            path="/personnelproperty/:id/properties"
+            element={<PersonnelProperties />}
+          />
         </Route>
       </Routes>
 
