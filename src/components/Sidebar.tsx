@@ -89,6 +89,7 @@ function Sidebar() {
         className="absolute top-0 right-0 h-full w-2 cursor-ew-resize hover:bg-blue-200/40"
       />
 
+kmjnh
       {/* LOGO */}
       <div
         onClick={() => setCollapsed(!collapsed)}
