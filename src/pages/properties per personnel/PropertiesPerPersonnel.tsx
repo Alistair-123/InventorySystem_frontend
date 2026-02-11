@@ -89,9 +89,9 @@ function PropertiesPerPersonnel() {
       </div>
 
       {/* Table */}
-      <div className="rounded-xl border-l border-r border-b border-gray-200">
-        <Table>
-          <TableHeader className="bg-gray-200 rounded-2xl">
+      <div className="rounded-xl border-l border-r border-b border-gray-200 p-5">
+        <Table >
+          <TableHeader >
             <TableRow>
               <TableHead className="w-[50px]">#</TableHead>
               <TableHead>Photo</TableHead>
@@ -119,7 +119,7 @@ function PropertiesPerPersonnel() {
               </TableRow>
             ) : (
               personnels.map((p, index) => (
-                <TableRow key={p._id}>
+                <TableRow key={p._id} className="p-4">
                    <TableCell className="font-semibold">
                     {(page - 1) * 5 + index + 1}
                   </TableCell>
