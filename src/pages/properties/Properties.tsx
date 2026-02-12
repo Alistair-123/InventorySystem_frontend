@@ -40,7 +40,7 @@ import {
 } from "./fetchdata";
 import ConfirmAction from "@/components/ActionMenu";
 import { toast } from "react-toastify";
-
+import StatusDot from "@/components/StatusDot";
 /* ============================
    FORM TYPE
 ============================ */
@@ -326,7 +326,7 @@ const confirmDelete = async () => {
                     <TableCell>{property.office?.officeName}</TableCell>
 
                     <TableCell>
-                      <span className="capitalize">{property.status}</span>
+                      <StatusDot status={property.status} />
                     </TableCell>
 
                     <TableCell className="text-right">
