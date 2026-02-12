@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
-import Dashboardheader from "@/components/Dashboardheader";
 
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 
 import {
   Table,
@@ -56,30 +54,16 @@ function PropertyStatusPage() {
   /* ============================
       STATUS COUNTS
   ============================ */
-  const total = properties.length;
-
-  const serviceable = properties.filter(
-    (p) => p.status === "serviceable"
-  ).length;
-
-  const unserviceable = properties.filter(
-    (p) => p.status === "unserviceable"
-  ).length;
-
-  const disposed = properties.filter((p) => p.status === "disposed").length;
-
-  const lost = properties.filter((p) => p.status === "lost").length;
 
   return (
     <div className="p-6 space-y-6 font-poppins">
-      <Dashboardheader title="Property Status Report" />
 
       {/* ========================================================= */}
       {/* HEADER */}
       {/* ========================================================= */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight">
-          Property Status Overview
+          Property Status
         </h1>
         <p className="text-muted-foreground">
           Monitor the condition breakdown of all registered properties.
@@ -155,36 +139,7 @@ function PropertyStatusPage() {
 
             <TableBody>
               {/* SUMMARY ROW */}
-              <TableRow className="bg-muted/40 font-semibold">
-                <TableCell>-</TableCell>
-                <TableCell>ALL PROPERTIES</TableCell>
-
-                <TableCell>
-                  <Badge variant="outline">{total}</Badge>
-                </TableCell>
-
-                <TableCell>
-                  <Badge className="bg-green-500 text-white">
-                    {serviceable}
-                  </Badge>
-                </TableCell>
-
-                <TableCell>
-                  <Badge className="bg-black text-white">
-                    {unserviceable}
-                  </Badge>
-                </TableCell>
-
-                <TableCell>
-                  <Badge variant="ghost" className="text-gray-600">
-                    {disposed}
-                  </Badge>
-                </TableCell>
-
-                <TableCell>
-                  <Badge variant="destructive">{lost}</Badge>
-                </TableCell>
-              </TableRow>
+              
 
               {/* PROPERTY ROWS */}
               {properties.map((p, index) => (
