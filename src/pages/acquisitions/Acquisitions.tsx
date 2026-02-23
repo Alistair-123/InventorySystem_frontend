@@ -191,7 +191,7 @@ function Acquisitions() {
   return (
     <div className='font-poppins'>
       <Dashboardheader title="Acquisition Management" />
-      <div className='flex items-center justify-between p-8'>
+      <div className='flex items-center justify-between p-4 pb-0'>
         <Input type="text" placeholder="Search Acquisition..." className="w-[300px] font-poppins"  onChange={(e) => {
             setSearch(e.target.value);
             setPage(1); // reset pagination on new search
@@ -199,8 +199,8 @@ function Acquisitions() {
         <Button className='cursor-pointer' onClick={() => setIsOpen(true)}>Add Acquisition</Button>
       </div>
 
-      <div className='p-8'>
-      <Table className='p-4 '>
+      <div className='p-4'>
+      <Table className='border '>
         <TableCaption>List of Acquisition</TableCaption>
         <TableHeader>
           <TableRow>

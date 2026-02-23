@@ -188,7 +188,7 @@ function Units() {
   return (
     <div className="font-poppins">
       <Dashboardheader title="Unit Management" />
-      <div className="flex items-center justify-between p-8">
+      <div className="flex items-center justify-between p-4 pb-0">
         <Input
           type="text"
           placeholder="Search Units..."
@@ -203,8 +203,8 @@ function Units() {
         </Button>
       </div>
 
-      <div className="p-8">
-        <Table className="p-4 ">
+      <div className="p-4">
+        <Table className="border ">
           <TableCaption>List of Units</TableCaption>
           <TableHeader>
             <TableRow>

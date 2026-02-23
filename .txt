@@ -19,3 +19,14 @@ Because Git doesn’t automatically know where to push this new branch, it requi
 Without setting this upstream (tracking) branch, git push has no default destination for your new branch, so it throws that error.
 
 In short: New local branches don’t automatically have a remote counterpart or tracking setup until you push with the upstream flag.
+
+
+Dashboard data
+
+- Total Items
+- Total Properties 
+- Total Users
+- Total Property Value
+
+- Total Property Status (Serviceable, unserviceable, disposed lost) 
+    

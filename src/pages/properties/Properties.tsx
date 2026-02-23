@@ -222,7 +222,7 @@ const confirmDelete = async () => {
     <div className="font-poppins">
       <Dashboardheader title="Property Management" />
 
-      <div className="flex items-center justify-between p-8">
+      <div className="flex items-center justify-between p-4 pb-0">
         <Input
           type="text"
           placeholder="Search Properties..."
@@ -235,8 +235,8 @@ const confirmDelete = async () => {
       </div>
 
       {/* TABLE (data loading later) */}
-      <div className="p-8">
-        <Table className="p-4">
+      <div className="p-4">
+        <Table className="border">
           <TableCaption>List of Properties</TableCaption>
 
           <TableHeader>

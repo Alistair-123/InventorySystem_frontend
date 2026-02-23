@@ -198,7 +198,7 @@ function Category() {
       <Dashboardheader title="Category Management" />
 
       {/* SEARCH + ADD */}
-      <div className="flex items-center justify-between p-8">
+      <div className="flex items-center justify-between p-4 pb-0">
         <Input
           type="text"
           placeholder="Search Categories..."
@@ -212,8 +212,8 @@ function Category() {
       </div>
 
       {/* TABLE */}
-      <div className="p-8">
-        <Table>
+      <div className="p-4 ">
+        <Table className="border">
           <TableCaption>List of Categories</TableCaption>
           <TableHeader>
   <TableRow>
