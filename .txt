@@ -28,5 +28,5 @@ Dashboard data
 - Total Users
 - Total Property Value
 
-- Total Property Status (Serviceable, unserviceable, disposed lost) 
+- Total Property Status ((this is for chartpiedonut)Serviceable -green, unserviceable -black, disposed -gray, lost -red) 
     
