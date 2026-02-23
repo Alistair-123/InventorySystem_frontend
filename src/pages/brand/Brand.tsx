@@ -197,7 +197,7 @@ function Brand() {
       <Dashboardheader title="Brand Management" />
 
       {/* SEARCH + ADD */}
-      <div className="flex items-center justify-between p-8">
+      <div className="flex items-center justify-between p-4 pb-0">
         <Input
           type="text"
           placeholder="Search Brands..."
@@ -211,8 +211,8 @@ function Brand() {
       </div>
 
       {/* TABLE */}
-      <div className="p-8">
-        <Table>
+      <div className="p-4">
+        <Table className=" border">
           <TableCaption>List of Brands</TableCaption>
           <TableHeader>
             <TableRow>
