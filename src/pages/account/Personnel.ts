@@ -4,6 +4,12 @@ export type PersonnelType = "plantilla" | "jobOrder";
 
 export type PersonnelStatus = "active" | "inactive";
 
+export interface UpdatePasswordPayload {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
 export interface PersonnelProfile {
   _id: string;
 
