@@ -38,12 +38,6 @@ export const sidebarData: Record<string, SidebarSection> = {
       properties: { label: "Properties", url: "/properties", icon: LuClipboardList},
     },
   },
-  adjustments: {
-    label: "Adjustments",
-    items: {
-      adjustmentReports: { label: "Adjustment Reports", url: "/adjustment-reports" },
-    },
-  },
   reports: {
     label: "Reports",
     items: {
@@ -52,6 +46,12 @@ export const sidebarData: Record<string, SidebarSection> = {
       propertiespercategory:  { label: "Properties per Category", url: "/reports/properties-per-category",    icon: FaLayerGroup},
       propertiesperitem:      { label: "Properties per Item",     url: "/reports/properties-per-item",        icon: FaFileAlt   },
       propertiesperpersonnel: { label: "Properties per Personnel",url: "/reports/properties-per-personnel",   icon: FaUsers     },
+    },
+  },
+  adjustments: {
+    label: "Adjustments",
+    items: {
+      adjustmentReports: { label: "Adjustment Reports", url: "/adjustment-reports" },
     },
   },
 };

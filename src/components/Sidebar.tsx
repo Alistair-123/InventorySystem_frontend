@@ -99,42 +99,45 @@ function Sidebar() {
 
           /* ── FLAT SECTION (Dashboard, Master Data, Adjustments) ── */
           if (isFlat) {
-            return (
-              <div key={key}>
-                {/* Section label shown only when expanded and has multiple items */}
-                {!collapsed && children.length > 1 && (
-                  <p className="px-3 pt-3 pb-1 text-xs font-semibold uppercase tracking-wider text-gray-400 ">
-                    {section.label}
-                  </p>
-                )}
-                {children.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <NavLink
-                      key={item.url}
-                      to={item.url}
-                      end
-                      className={({ isActive }) =>
-                        `${baseNav} ${
-                          isActive
-                            ? "bg-blue-100 text-blue-800 border-l-4 border-blue-600 shadow-sm "
-                            : "text-gray-700 hover:bg-gray-100 hover:translate-x-1 "
-                        }`
-                      }
-                    >
-                     {/* Use section icon for single-item sections, item icon for multi-item */}
-                      {children.length === 1 && iconSrc ? (
-                        <img src={iconSrc} className="w-5 h-5 opacity-80 shrink-0" />
-                      ) : (
-                        Icon && <Icon size={18} className="opacity-80 shrink-0" />
-                      )}
-                      {!collapsed && item.label}
-                    </NavLink>
-                  );
-                })}
-              </div>
-            );
+  return (
+    <div key={key} className="">
+      {!collapsed && children.length > 1 && (
+        <p className="px-3 pt-3 pb-1 text-xs font-semibold uppercase tracking-wider text-gray-400">
+          {section.label}
+        </p>
+      )}
+      {children.map((item) => {
+        const Icon = item.icon;
+        return (
+          <NavLink
+            key={item.url}
+            to={item.url}
+            end
+           className={({ isActive }) =>
+  `${baseNav} ${collapsed ? "justify-center" : ""} ${
+    section.label === "Master Data" && !collapsed ? "ml-4 mb-1" : "mb-1"
+  } ${
+    isActive
+      ? "bg-blue-100 text-blue-800 border-l-4 border-blue-600 shadow-sm"
+      : "text-gray-700 hover:bg-gray-100 hover:translate-x-1"
+  }`
+
           }
+          >
+            {children.length === 1 && iconSrc ? (
+  <span className="flex items-center justify-center w-5 h-5 shrink-0">
+    <img src={iconSrc} className="w-5 h-5 opacity-80" />
+  </span>
+) : (
+  Icon && <Icon size={18} className="opacity-80 shrink-0" />
+)}
+            {!collapsed && item.label}
+          </NavLink>
+        );
+      })}
+    </div>
+  );
+}
 
           /* ── ACCORDION SECTION (Transactions, Reports) ── */
           return (
