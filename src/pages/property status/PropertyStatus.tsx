@@ -17,13 +17,41 @@ import { Loader2, Search } from "lucide-react";
 import { fetchProperties } from "./Api";
 import type { Property } from "./types";
 
+/* ============================
+    STATUS CONFIG
+============================ */
+const STATUS_CONFIG: Record<
+  string,
+  { label: string; color: string; badgeClass: string }
+> = {
+  serviceable: {
+    label: "Serviceable",
+    color: "bg-green-500",
+    badgeClass: "bg-green-500 text-white",
+  },
+  unserviceable: {
+    label: "Unserviceable",
+    color: "bg-black",
+    badgeClass: "bg-black text-white",
+  },
+  disposed: {
+    label: "Disposed",
+    color: "bg-gray-400",
+    badgeClass: "bg-gray-400 text-white",
+  },
+  lost: {
+    label: "Lost",
+    color: "bg-red-500",
+    badgeClass: "bg-red-500 text-white",
+  },
+};
+
 function PropertyStatusPage() {
   /* ============================
       STATE
   ============================ */
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
-
   const [search, setSearch] = useState("");
 
   /* ============================
@@ -51,10 +79,6 @@ function PropertyStatusPage() {
     loadProperties();
   }, [search]);
 
-  /* ============================
-      STATUS COUNTS
-  ============================ */
-
   return (
     <div className="p-6 space-y-6 font-poppins">
 
@@ -68,6 +92,18 @@ function PropertyStatusPage() {
         <p className="text-muted-foreground">
           Monitor the condition breakdown of all registered properties.
         </p>
+      </div>
+
+      {/* ========================================================= */}
+      {/* LEGEND */}
+      {/* ========================================================= */}
+      <div className="flex flex-wrap items-center gap-4">
+        {Object.values(STATUS_CONFIG).map((s) => (
+          <div key={s.label} className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span className={`w-3 h-3 rounded-full ${s.color}`} />
+            {s.label}
+          </div>
+        ))}
       </div>
 
       {/* ========================================================= */}
@@ -100,98 +136,53 @@ function PropertyStatusPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>#</TableHead>
+                <TableHead className="w-12">#</TableHead>
                 <TableHead>Property No.</TableHead>
-
-                {/* TOTAL */}
-                <TableHead>Total</TableHead>
-
-                {/* STATUS COUNTS */}
-                <TableHead>
-                  <div className="flex items-center gap-2">
-                    <span className="bg-green-500 w-3 h-3 rounded-full" />
-                    Serviceable
-                  </div>
-                </TableHead>
-
-                <TableHead>
-                  <div className="flex items-center gap-2">
-                    <span className="bg-black w-3 h-3 rounded-full" />
-                    Unserviceable
-                  </div>
-                </TableHead>
-
-                <TableHead>
-                  <div className="flex items-center gap-2">
-                    <span className="bg-gray-400 w-3 h-3 rounded-full" />
-                    Disposed
-                  </div>
-                </TableHead>
-
-                <TableHead>
-                  <div className="flex items-center gap-2">
-                    <span className="bg-red-500 w-3 h-3 rounded-full" />
-                    Lost
-                  </div>
-                </TableHead>
+                <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
 
             <TableBody>
-              {/* SUMMARY ROW */}
-              
+              {properties.map((p, index) => {
+                const config = STATUS_CONFIG[p.status] ?? {
+                  label: p.status,
+                  color: "bg-gray-300",
+                  badgeClass: "bg-gray-300 text-white",
+                };
 
-              {/* PROPERTY ROWS */}
-              {properties.map((p, index) => (
-                <TableRow
-                  key={p._id}
-                  className="hover:bg-muted/30 transition"
-                >
-                  {/* NUMBER INDICATOR */}
-                  <TableCell>{index + 1}</TableCell>
+                return (
+                  <TableRow
+                    key={p._id}
+                    className="hover:bg-muted/30 transition"
+                  >
+                    {/* NUMBER */}
+                    <TableCell className="text-muted-foreground">
+                      {index + 1}
+                    </TableCell>
 
-                  {/* PROPERTY NO */}
-                  <TableCell className="font-medium">
-                    {p.propertyNo}
-                  </TableCell>
+                    {/* PROPERTY NO */}
+                    <TableCell className="font-medium">
+                      {p.propertyNo}
+                    </TableCell>
 
-                  {/* TOTAL ALWAYS 1 */}
-                  <TableCell>
-                    <Badge variant="outline">1</Badge>
-                  </TableCell>
-
-                  {/* STATUS COUNTS (SHOW EVEN IF 0) */}
-                  <TableCell>
-                    <Badge className="bg-green-500 text-white">
-                      {p.status === "serviceable" ? 1 : 0}
-                    </Badge>
-                  </TableCell>
-
-                  <TableCell>
-                    <Badge className="bg-black text-white">
-                      {p.status === "unserviceable" ? 1 : 0}
-                    </Badge>
-                  </TableCell>
-
-                  <TableCell>
-                    <Badge variant="ghost" className="text-gray-600">
-                      {p.status === "disposed" ? 1 : 0}
-                    </Badge>
-                  </TableCell>
-
-                  <TableCell>
-                    <Badge variant="destructive">
-                      {p.status === "lost" ? 1 : 0}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
+                    {/* STATUS */}
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2.5 h-2.5 rounded-full ${config.color}`} />
+                        <Badge className={config.badgeClass}>
+                          {config.label}
+                        </Badge>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
 
               {/* EMPTY */}
               {properties.length === 0 && (
                 <TableRow>
                   <TableCell
-                    colSpan={7}
+                    colSpan={3}
                     className="text-center text-muted-foreground py-8"
                   >
                     No properties found.
