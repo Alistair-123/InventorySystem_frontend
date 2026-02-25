@@ -5,6 +5,7 @@ export type Personnel = {
   id: string;
   personnelId: string;
   firstName: string;
+  middleName: string
   lastName: string;
   designationName: string;
   role: Role;

@@ -2,6 +2,7 @@ import React, { useState, useRef, useContext, useEffect } from "react";
 import { FiUser, FiLock, FiCamera, FiX, FiSave, FiEye, FiEyeOff } from "react-icons/fi";
 import { ImSpinner8 } from "react-icons/im";
 import { AuthContext } from '@/context/auth/authContext'; // adjust path
+
 import {
   updateMyProfile,
   updateMyPassword,
@@ -13,6 +14,44 @@ type AccountProps = {
 };
 
 type View = "info" | "password";
+
+const PasswordField = ({
+  label,
+  value,
+  onChange,
+  show,
+  onToggle,
+  inputClass,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  show: boolean;
+  onToggle: () => void;
+  inputClass: string;
+}) => (
+  <div>
+    <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
+    <div className="relative">
+      <input
+        type={show ? "text" : "password"}
+        
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="••••••••"
+        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition pr-10"
+      />
+      <button
+        type="button"
+        onClick={onToggle}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+      >
+        {show ? <FiEyeOff size={15} /> : <FiEye size={15} />}
+      </button>
+    </div>
+  </div>
+);
+
 
 const Account: React.FC<AccountProps> = ({ onClose }) => {
   const auth = useContext(AuthContext);
@@ -124,6 +163,9 @@ const Account: React.FC<AccountProps> = ({ onClose }) => {
       setNewPassword("");
       setConfirmPassword("");
       showFlash("Password changed successfully.");
+      setTimeout(() => {
+        auth?.logout(); // or however your context exposes it
+      }, 1500);
     } catch {
       showFlash("Incorrect current password or server error.", "error");
     } finally {
@@ -151,40 +193,7 @@ const Account: React.FC<AccountProps> = ({ onClose }) => {
     </button>
   );
 
-  const PasswordField = ({
-    label,
-    value,
-    onChange,
-    show,
-    onToggle,
-  }: {
-    label: string;
-    value: string;
-    onChange: (v: string) => void;
-    show: boolean;
-    onToggle: () => void;
-  }) => (
-    <div>
-      <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
-      <div className="relative">
-        <input
-          type={show ? "text" : "password"}
-          className={`${inputClass} pr-10`}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder="••••••••"
-        />
-        <button
-          type="button"
-          onClick={onToggle}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-        >
-          {show ? <FiEyeOff size={15} /> : <FiEye size={15} />}
-        </button>
-      </div>
-    </div>
-  );
-
+  
   // Password strength calculation (0–4)
   const passwordStrength = (pw: string) =>
     Math.min(
@@ -383,68 +392,68 @@ const Account: React.FC<AccountProps> = ({ onClose }) => {
             )}
 
             {/* ── PASSWORD VIEW ── */}
-            {view === "password" && (
-              <div className="max-w-md flex flex-col gap-5">
-                <p className="text-sm text-gray-500 leading-relaxed">
-                  Use a strong password with at least{" "}
-                  <span className="font-medium text-gray-700">8 characters</span>.
-                </p>
+          {/* ── PASSWORD VIEW ── */}
+{view === "password" && (
+  <div className="max-w-md flex flex-col gap-5">
+    <PasswordField
+      label="Current Password"
+      value={oldPassword}
+      onChange={setOldPassword}
+      show={showOld}
+      onToggle={() => setShowOld((p) => !p)}
+    />
+    <PasswordField
+      label="New Password"
+      value={newPassword}
+      onChange={setNewPassword}
+      show={showNew}
+      onToggle={() => setShowNew((p) => !p)}
+    />
 
-                <PasswordField
-                  label="Current Password"
-                  value={oldPassword}
-                  onChange={setOldPassword}
-                  show={showOld}
-                  onToggle={() => setShowOld((v) => !v)}
-                />
-                <PasswordField
-                  label="New Password"
-                  value={newPassword}
-                  onChange={setNewPassword}
-                  show={showNew}
-                  onToggle={() => setShowNew((v) => !v)}
-                />
+    {/* Password strength bar */}
+    {newPassword && (
+      <div className="space-y-1">
+        <div className="flex gap-1">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className={`h-1.5 flex-1 rounded-full transition-all ${
+                i < passwordStrength(newPassword)
+                  ? strengthColor[passwordStrength(newPassword) - 1]
+                  : "bg-gray-200"
+              }`}
+            />
+          ))}
+        </div>
+        <p className="text-[11px] text-gray-400">
+          Strength:{" "}
+          <span className="font-medium">
+            {strengthLabel[passwordStrength(newPassword) - 1] ?? "Weak"}
+          </span>
+        </p>
+      </div>
+    )}
 
-                {/* Strength bar */}
-                {newPassword && (
-                  <div className="flex gap-1.5 items-center -mt-2">
-                    {[1, 2, 3, 4].map((i) => {
-                      const s = passwordStrength(newPassword);
-                      return (
-                        <div
-                          key={i}
-                          className={`h-1 flex-1 rounded-full transition-colors ${
-                            i <= s ? strengthColor[s - 1] : "bg-gray-200"
-                          }`}
-                        />
-                      );
-                    })}
-                    <span className="text-[11px] text-gray-400 ml-1 w-10">
-                      {strengthLabel[passwordStrength(newPassword) - 1] ?? ""}
-                    </span>
-                  </div>
-                )}
+    <PasswordField
+      label="Confirm New Password"
+      value={confirmPassword}
+      onChange={setConfirmPassword}
+      show={showConfirm}
+      onToggle={() => setShowConfirm((p) => !p)}
+    />
 
-                <PasswordField
-                  label="Confirm New Password"
-                  value={confirmPassword}
-                  onChange={setConfirmPassword}
-                  show={showConfirm}
-                  onToggle={() => setShowConfirm((v) => !v)}
-                />
-
-                <div className="flex justify-end pt-1">
-                  <button
-                    onClick={handleChangePassword}
-                    disabled={saving}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-medium rounded-lg transition"
-                  >
-                    {saving ? <ImSpinner8 size={13} className="animate-spin" /> : <FiLock size={13} />}
-                    {saving ? "Updating..." : "Update Password"}
-                  </button>
-                </div>
-              </div>
-            )}
+    <div className="flex justify-end pt-2">
+      <button
+        onClick={handleChangePassword}
+        disabled={saving}
+        className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-medium rounded-lg transition"
+      >
+        {saving ? <ImSpinner8 size={13} className="animate-spin" /> : <FiLock size={13} />}
+        {saving ? "Saving..." : "Change Password"}
+      </button>
+    </div>
+  </div>
+)}
           </div>
         </div>
       </div>

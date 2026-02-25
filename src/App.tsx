@@ -3,7 +3,7 @@ import LoadPage from "./pages/loadpage/LoadPage";
 import LogInPage from "./pages/login/LogInPage";
 import Dashboard from "./pages/dashboard/Dashboard";
 import Layout from "./layout/Layout";
-
+import DashboardRedirect from "./context/DashboardRedirect";
 // Pages
 import Category from "./pages/category/Category";
 import Brand from "./pages/brand/Brand";
@@ -38,7 +38,7 @@ function AppWrapper() {
         <Route path="/login" element={<LogInPage />} />
 
         {/* Protected / Layout */}
-        <Route element={<Layout />}>
+        <Route element={<DashboardRedirect><Layout /></DashboardRedirect>}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/categories" element={<Category />} />
           <Route path="/brands" element={<Brand />} />

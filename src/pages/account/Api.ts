@@ -1,5 +1,5 @@
 import api from "@/utils/axiosInstance";
-import type { PersonnelProfile } from "./Personnel";
+import type { PersonnelProfile, UpdatePasswordPayload } from "./Personnel";
 // ProfileService.ts
 
 export const fetchMyProfile = async (): Promise<PersonnelProfile> => {

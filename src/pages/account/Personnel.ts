@@ -5,9 +5,8 @@ export type PersonnelType = "plantilla" | "jobOrder";
 export type PersonnelStatus = "active" | "inactive";
 
 export interface UpdatePasswordPayload {
-  currentPassword: string;
+  oldPassword: string;    // ✅ matches backend
   newPassword: string;
-  confirmPassword: string;
 }
 
 export interface PersonnelProfile {
