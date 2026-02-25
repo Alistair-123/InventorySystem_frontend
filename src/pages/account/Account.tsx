@@ -1,361 +1,461 @@
-import React, { useState, useRef } from "react";
-import { FiUser, FiLock, FiClock, FiCamera } from "react-icons/fi";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import React, { useState, useRef, useContext, useEffect } from "react";
+import { FiUser, FiLock, FiCamera, FiX, FiSave, FiEye, FiEyeOff } from "react-icons/fi";
+import { ImSpinner8 } from "react-icons/im";
+import { AuthContext } from '@/context/auth/authContext'; // adjust path
 
+import {
+  updateMyProfile,
+  updateMyPassword,
+  updateProfileImage,
+} from "./Api"; // adjust path
+import { resolveImageUrl } from '@/utils/image'; // adjust path
 type AccountProps = {
   onClose: () => void;
 };
 
-type View = "info" | "password" | "logs";
+type View = "info" | "password";
+
+const PasswordField = ({
+  label,
+  value,
+  onChange,
+  show,
+  onToggle,
+  inputClass,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  show: boolean;
+  onToggle: () => void;
+  inputClass: string;
+}) => (
+  <div>
+    <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
+    <div className="relative">
+      <input
+        type={show ? "text" : "password"}
+        
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="••••••••"
+        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition pr-10"
+      />
+      <button
+        type="button"
+        onClick={onToggle}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+      >
+        {show ? <FiEyeOff size={15} /> : <FiEye size={15} />}
+      </button>
+    </div>
+  </div>
+);
+
 
 const Account: React.FC<AccountProps> = ({ onClose }) => {
-  const [view, setView] = useState<View>("info");
-  const [previewUrl, setPreviewUrl] = useState("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const auth = useContext(AuthContext);
+  const user = auth?.user ?? null;
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Check file size (5MB max)
-      if (file.size > 50 * 1024 * 1024) {
-        alert('File size should be less than 5MB');
-        return;
+  const [view, setView] = useState<View>("info");
+  const [saving, setSaving] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
+  const [flash, setFlash] = useState<{ msg: string; type: "success" | "error" } | null>(null);
+  const [previewUrl, setPreviewUrl] = useState(resolveImageUrl(user?.image));
+
+  // Editable info
+  const [firstName, setFirstName] = useState(user?.firstName ?? "");
+  const [middleName, setMiddleName] = useState(user?.middleName ?? "");
+  const [lastName, setLastName] = useState(user?.lastName ?? "");
+
+  // Password
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showOld, setShowOld] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Sync if user loads late (e.g. context hydrates after mount)
+  useEffect(() => {
+    if (user) {
+      setFirstName(user.firstName);
+      setMiddleName(user.middleName ?? "");
+      setLastName(user.lastName);
+     setPreviewUrl(resolveImageUrl(user.image));
+    }
+  }, [user]);
+
+  const showFlash = (msg: string, type: "success" | "error" = "success") => {
+    setFlash({ msg, type });
+    setTimeout(() => setFlash(null), 3500);
+  };
+
+  const handleSaveProfile = async () => {
+    if (!firstName.trim() || !lastName.trim()) {
+      showFlash("First and last name are required.", "error");
+      return;
+    }
+    setSaving(true);
+    try {
+      await updateMyProfile({ firstName, middleName, lastName });
+      // Mutate the context user object so the rest of the app reflects the change
+      if (auth?.user) {
+        auth.user.firstName = firstName;
+        auth.user.middleName = middleName;
+        auth.user.lastName = lastName;
       }
-      
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = reader.result as string;
-        setPreviewUrl(result);
-      };
-      reader.onerror = () => {
-        alert('Error reading file');
-      };
-      reader.readAsDataURL(file);
+      showFlash("Profile updated successfully.");
+    } catch {
+      showFlash("Failed to update profile.", "error");
+    } finally {
+      setSaving(false);
     }
   };
 
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      showFlash("Image must be under 5MB.", "error");
+      return;
+    }
+    // Instant local preview
+    const reader = new FileReader();
+    reader.onloadend = () => setPreviewUrl(reader.result as string);
+    reader.readAsDataURL(file);
+
+    setImageUploading(true);
+    try {
+      const updated = await updateProfileImage(file);
+     if (updated.personnelImage) {
+      const fullUrl = resolveImageUrl(updated.personnelImage);
+      setPreviewUrl(fullUrl);
+      if (auth?.user) auth.user.image = updated.personnelImage; // ✅ use .image
+    }
+      showFlash("Profile photo updated.");
+    } catch {
+      showFlash("Failed to upload image.", "error");
+    } finally {
+      setImageUploading(false);
+    }
   };
 
-  const SidebarButton = ({
-    active,
-    icon,
-    label,
-    onClick,
-  }: {
-    active: boolean;
-    icon: React.ReactNode;
-    label: string;
-    onClick: () => void;
-  }) => (
+  const handleChangePassword = async () => {
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      showFlash("All password fields are required.", "error");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      showFlash("New passwords do not match.", "error");
+      return;
+    }
+    if (newPassword.length < 8) {
+      showFlash("New password must be at least 8 characters.", "error");
+      return;
+    }
+    setSaving(true);
+    try {
+      await updateMyPassword({ oldPassword, newPassword });
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      showFlash("Password changed successfully.");
+      setTimeout(() => {
+        auth?.logout(); // or however your context exposes it
+      }, 1500);
+    } catch {
+      showFlash("Incorrect current password or server error.", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const getInitials = () =>
+    `${user?.firstName?.[0] ?? ""}${user?.lastName?.[0] ?? ""}`.toUpperCase() || "?";
+
+  const inputClass =
+    "w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition";
+
+  const SidebarBtn = ({ id, icon, label }: { id: View; icon: React.ReactNode; label: string }) => (
     <button
-      onClick={onClick}
-      className={`flex items-center gap-3 px-6 py-3 text-sm transition
-        ${
-          active
-            ? "bg-white font-semibold border-r-4 border-blue-600 text-gray-900"
-            : "text-gray-700 hover:bg-gray-100"
-        }`}
+      onClick={() => setView(id)}
+      className={`flex items-center gap-3 w-full px-4 py-3 text-sm rounded-lg transition ${
+        view === id
+          ? "bg-blue-50 text-blue-700 font-semibold"
+          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+      }`}
     >
-      {icon}
+      <span className={view === id ? "text-blue-500" : "text-gray-400"}>{icon}</span>
       {label}
     </button>
   );
 
-  const inputClass =
-    "w-full px-4 py-2 rounded-md border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500";
+  
+  // Password strength calculation (0–4)
+  const passwordStrength = (pw: string) =>
+    Math.min(
+      Math.floor(pw.length / 3) +
+        (/[A-Z]/.test(pw) ? 1 : 0) +
+        (/[0-9]/.test(pw) ? 1 : 0) +
+        (/[^a-zA-Z0-9]/.test(pw) ? 1 : 0),
+      4
+    );
+
+  const strengthLabel = ["Weak", "Fair", "Good", "Strong"];
+  const strengthColor = ["bg-red-400", "bg-yellow-400", "bg-blue-400", "bg-green-500"];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center font-[Poppins]">
-      {/* Overlay */}
-      <div onClick={onClose} className="absolute inset-0 bg-black/40" />
+      <div onClick={onClose} className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
 
-      {/* Modal */}
-      <div className="relative w-[900px] max-w-[95%] h-[90vh] bg-white rounded-2xl shadow-2xl flex overflow-hidden">
-        {/* Sidebar */}
-        <aside className="w-64 bg-gray-100 border-r border-gray-200 flex flex-col">
-          <div className="p-6 font-semibold text-lg border-b border-gray-200">
-            Account Settings
+      <div className="relative w-[860px] max-w-[95%] h-[82vh] bg-white rounded-2xl shadow-2xl flex overflow-hidden">
+        {/* ── Sidebar ── */}
+        <aside className="w-52 bg-gray-50 border-r border-gray-100 flex flex-col py-6 px-3 shrink-0">
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-3">
+            Settings
+          </p>
+          <div className="flex flex-col gap-1">
+            <SidebarBtn id="info" icon={<FiUser size={15} />} label="Profile Info" />
+            <SidebarBtn id="password" icon={<FiLock size={15} />} label="Change Password" />
           </div>
 
-          <SidebarButton
-            active={view === "info"}
-            icon={<FiUser size={18} />}
-            label="Edit User Info"
-            onClick={() => setView("info")}
-          />
-
-          <SidebarButton
-            active={view === "password"}
-            icon={<FiLock size={18} />}
-            label="Change Password"
-            onClick={() => setView("password")}
-          />
-
-          <SidebarButton
-            active={view === "logs"}
-            icon={<FiClock size={18} />}
-            label="User Logs"
-            onClick={() => setView("logs")}
-          />
-        </aside>
-
-        {/* Content */}
-        <main className="flex-1 p-6 overflow-y-auto">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-semibold">
-              {view === "info" && "Edit User Info"}
-              {view === "password" && "Change Password"}
-              {view === "logs" && "User Logs"}
-            </h2>
-
-            <button
-              onClick={onClose}
-              className="text-2xl text-gray-500 hover:text-gray-700"
-            >
-              ✕
-            </button>
-          </div>
-
-          {/* EDIT USER INFO */}
-          {view === "info" && (
-            <form className="space-y-6">
-              {/* Profile Picture Section - Full Width */}
-              <div className="flex items-center gap-6 mb-6">
-                <div className="relative">
-                  <div 
-                    className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-50 to-gray-100 flex items-center justify-center overflow-hidden border-2 border-white shadow-md cursor-pointer"
-                    onClick={triggerFileInput}
-                  >
-                    {previewUrl ? (
-                      <img
-                        src={previewUrl}
-                        alt="Profile preview"
-                        className="w-full h-full object-cover"
-                        onError={() => setPreviewUrl('')}
-                      />
-                    ) : (
-                      <div className="text-gray-400">
-                        <FiUser className="w-8 h-8" />
-                      </div>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      triggerFileInput();
-                    }}
-                    className="absolute -bottom-2 -right-2 bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-all shadow-lg hover:scale-110"
-                    title="Change profile picture"
-                  >
-                    <FiCamera className="w-4 h-4" />
-                  </button>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleFileChange}
-                  />
+          {/* User badge at bottom */}
+          {user && (
+            <div className="mt-auto px-1">
+              <div className="bg-white border border-gray-200 rounded-xl p-3 flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600 overflow-hidden shrink-0">
+                  {previewUrl ? (
+                    <img src={resolveImageUrl(user.image)} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    getInitials()
+                  )}
                 </div>
-                <div>
-                  <h3 className="font-medium text-gray-900">Profile Photo</h3>
-                  <p className="text-sm text-gray-500">JPG, GIF or PNG. Max size of 5MB</p>
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold text-gray-800 truncate">
+                    {user.firstName} {user.lastName}
+                  </p>
+                  <p className="text-[10px] text-gray-400 capitalize">{user.role}</p>
                 </div>
-              </div>
-
-              {/* Name Fields - 3 columns */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    First Name:
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Juan"
-                    className={inputClass}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Middle Name:
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="M."
-                    className={inputClass}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Last Name:
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Dela Cruz"
-                    className={inputClass}
-                  />
-                </div>
-              </div>
-
-              {/* Personnel Type and Status - 2 columns */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Personnel Type:
-                  </label>
-                  <Select>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="plantilla">Plantilla</SelectItem>
-                      <SelectItem value="job-order">Job Order</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Status:
-                  </label>
-                  <Select>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="active">
-                        <span className="h-2.5 w-2.5 rounded-full bg-green-500 mr-2 inline-block" />
-                        Active
-                      </SelectItem>
-                      <SelectItem value="resigned">
-                        <span className="h-2.5 w-2.5 rounded-full bg-red-500 mr-2 inline-block" />
-                        Resigned
-                      </SelectItem>
-                      <SelectItem value="retired">
-                        <span className="h-2.5 w-2.5 rounded-full bg-yellow-500 mr-2 inline-block" />
-                        Retired
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* Designation and User ID - 2 columns */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Designation Name:
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g., Administrative Officer II"
-                    className={inputClass}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    User ID:
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="USER-001"
-                    className={inputClass}
-                  />
-                </div>
-              </div>
-
-              {/* Save Button */}
-              <div className="flex justify-end pt-4 border-t">
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </form>
-          )}
-
-          {/* CHANGE PASSWORD */}
-          {view === "password" && (
-            <form className="space-y-6 max-w-xl">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Current Password:
-                </label>
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  className={inputClass}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  New Password:
-                </label>
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  className={inputClass}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Confirm New Password:
-                </label>
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  className={inputClass}
-                />
-              </div>
-
-              <div className="flex justify-end pt-4 border-t">
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition"
-                >
-                  Update Password
-                </button>
-              </div>
-            </form>
-          )}
-
-          {/* USER LOGS */}
-          {view === "logs" && (
-            <div className="space-y-4 max-w-2xl">
-              <p className="text-sm text-gray-600">
-                Your recent account activities:
-              </p>
-
-              {/* MOCK DATA */}
-              <div className="border border-gray-200 rounded-lg overflow-hidden">
-                <ul className="divide-y text-sm">
-                  <li className="px-4 py-3 hover:bg-gray-50">
-                    Logged in — Jan 20, 2026 · 10:32 AM
-                  </li>
-                  <li className="px-4 py-3 hover:bg-gray-50">
-                    Changed password — Jan 18, 2026 · 4:12 PM
-                  </li>
-                  <li className="px-4 py-3 hover:bg-gray-50">
-                    Updated profile — Jan 15, 2026 · 9:40 AM
-                  </li>
-                </ul>
               </div>
             </div>
           )}
-        </main>
+        </aside>
+
+        {/* ── Main ── */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Header */}
+          <div className="flex items-center justify-between px-8 py-5 border-b border-gray-100 shrink-0">
+            <h2 className="text-base font-semibold text-gray-800">
+              {view === "info" ? "Profile Information" : "Change Password"}
+            </h2>
+            <button
+              onClick={onClose}
+              className="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition"
+            >
+              <FiX size={17} />
+            </button>
+          </div>
+
+          {/* Flash */}
+          {flash && (
+            <div
+              className={`mx-8 mt-4 px-4 py-2.5 rounded-lg text-sm font-medium border ${
+                flash.type === "error"
+                  ? "bg-red-50 text-red-700 border-red-200"
+                  : "bg-green-50 text-green-700 border-green-200"
+              }`}
+            >
+              {flash.msg}
+            </div>
+          )}
+
+          {/* Scrollable content */}
+          <div className="flex-1 overflow-y-auto px-8 py-6">
+            {/* ── INFO VIEW ── */}
+            {view === "info" && (
+              <div className="flex gap-10">
+                {/* Avatar */}
+                <div className="flex flex-col items-center gap-3 shrink-0">
+                  <div className="relative">
+                    <div className="w-28 h-28 rounded-full bg-blue-50 border-2 border-gray-200 flex items-center justify-center overflow-hidden text-2xl font-bold text-blue-400">
+                      {previewUrl ? (
+                        <img src={previewUrl} alt="avatar" className="w-full h-full object-cover" />
+                      ) : (
+                        getInitials()
+                      )}
+                    </div>
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={imageUploading}
+                      className="absolute bottom-1 right-1 w-8 h-8 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white rounded-full flex items-center justify-center shadow transition"
+                    >
+                      {imageUploading ? (
+                        <ImSpinner8 size={12} className="animate-spin" />
+                      ) : (
+                        <FiCamera size={13} />
+                      )}
+                    </button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageChange}
+                    />
+                  </div>
+                  <p className="text-[11px] text-gray-400 text-center leading-relaxed">
+                    Click to change photo
+                    <br />
+                    Max 5MB
+                  </p>
+                </div>
+
+                {/* Fields */}
+                <div className="flex-1 flex flex-col gap-5">
+                  {/* Read-only */}
+                  <div className="grid grid-cols-2 gap-4">
+                    {[
+                      { label: "Personnel ID", value: user?.personnelId },
+                      { label: "Designation", value: user?.designationName },
+                      { label: "Role", value: user?.role },
+                      { label: "Type", value: user?.personnelType },
+                    ].map(({ label, value }) => (
+                      <div key={label}>
+                        <label className="block text-xs font-medium text-gray-400 mb-1">{label}</label>
+                        <input
+                          className={`${inputClass} cursor-not-allowed capitalize`}
+                          value={value ?? "—"}
+                          readOnly
+                          tabIndex={-1}
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Editable name */}
+                  <div className="border-t border-gray-100 pt-5">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">
+                      Edit Name
+                    </p>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-500 mb-1">
+                          First Name <span className="text-red-400">*</span>
+                        </label>
+                        <input
+                          className={inputClass}
+                          value={firstName}
+                          onChange={(e) => setFirstName(e.target.value)}
+                          placeholder="First name"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-500 mb-1">
+                          Middle Name
+                        </label>
+                        <input
+                          className={inputClass}
+                          value={middleName}
+                          onChange={(e) => setMiddleName(e.target.value)}
+                          placeholder="Middle name"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-500 mb-1">
+                          Last Name <span className="text-red-400">*</span>
+                        </label>
+                        <input
+                          className={inputClass}
+                          value={lastName}
+                          onChange={(e) => setLastName(e.target.value)}
+                          placeholder="Last name"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end">
+                    <button
+                      onClick={handleSaveProfile}
+                      disabled={saving}
+                      className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-medium rounded-lg transition"
+                    >
+                      {saving ? <ImSpinner8 size={13} className="animate-spin" /> : <FiSave size={13} />}
+                      {saving ? "Saving..." : "Save Changes"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ── PASSWORD VIEW ── */}
+          {/* ── PASSWORD VIEW ── */}
+{view === "password" && (
+  <div className="max-w-md flex flex-col gap-5">
+    <PasswordField
+      label="Current Password"
+      value={oldPassword}
+      onChange={setOldPassword}
+      show={showOld}
+      onToggle={() => setShowOld((p) => !p)}
+    />
+    <PasswordField
+      label="New Password"
+      value={newPassword}
+      onChange={setNewPassword}
+      show={showNew}
+      onToggle={() => setShowNew((p) => !p)}
+    />
+
+    {/* Password strength bar */}
+    {newPassword && (
+      <div className="space-y-1">
+        <div className="flex gap-1">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className={`h-1.5 flex-1 rounded-full transition-all ${
+                i < passwordStrength(newPassword)
+                  ? strengthColor[passwordStrength(newPassword) - 1]
+                  : "bg-gray-200"
+              }`}
+            />
+          ))}
+        </div>
+        <p className="text-[11px] text-gray-400">
+          Strength:{" "}
+          <span className="font-medium">
+            {strengthLabel[passwordStrength(newPassword) - 1] ?? "Weak"}
+          </span>
+        </p>
+      </div>
+    )}
+
+    <PasswordField
+      label="Confirm New Password"
+      value={confirmPassword}
+      onChange={setConfirmPassword}
+      show={showConfirm}
+      onToggle={() => setShowConfirm((p) => !p)}
+    />
+
+    <div className="flex justify-end pt-2">
+      <button
+        onClick={handleChangePassword}
+        disabled={saving}
+        className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-medium rounded-lg transition"
+      >
+        {saving ? <ImSpinner8 size={13} className="animate-spin" /> : <FiLock size={13} />}
+        {saving ? "Saving..." : "Change Password"}
+      </button>
+    </div>
+  </div>
+)}
+          </div>
+        </div>
       </div>
     </div>
   );

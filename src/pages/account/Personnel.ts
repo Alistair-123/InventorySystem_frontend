@@ -4,6 +4,11 @@ export type PersonnelType = "plantilla" | "jobOrder";
 
 export type PersonnelStatus = "active" | "inactive";
 
+export interface UpdatePasswordPayload {
+  oldPassword: string;    // ✅ matches backend
+  newPassword: string;
+}
+
 export interface PersonnelProfile {
   _id: string;
 

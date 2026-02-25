@@ -5,10 +5,12 @@ import BgImage from "../../assets/logos1.png";
 import DICT from "../../assets/DictLongLogo.png";
 import { FormField } from "../../components/molecules/FormField";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import { Button } from "../../components/atoms/Buttons";
+import { Button } from "@/components/ui/button";
 import Card from "../../components/atoms/Card";
 import { useAuth } from "../../context/UseAuth";
 import { useNavigate } from "react-router-dom";
+import { Input } from "@/components/ui/input";
+import pinasimage from "@/assets/bagongpinas.png"
 
 type FormData = {
   personnelId: string;
@@ -31,160 +33,130 @@ function LogInPage() {
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     clearErrors();
+
     try {
       await login(data);
       setSuccess(true);
       navigate("/dashboard");
-    } catch {
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message || "Invalid User ID or password.";
+
       setError("root", {
-        type: "credentials",
-        message: "Invalid User ID or password.",
+        type: "server",
+        message,
       });
+
       setFocus("personnelId");
     }
   };
 
-
   return (
-    <div
-      className={`relative min-h-screen flex items-center justify-center overflow-hidden
-      bg-white transition-opacity duration-700
-      ${success ? "opacity-0" : "opacity-100"}`}
-      style={{ fontFamily: "'Inter', sans-serif" }}
-    >
-    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-      <img
-        src={BgImage}
-        alt=""
-        className="
-        w-[650px]
-        opacity-15
-        grayscale
-        animate-[slowSpin_90s_linear_infinite]
-      "
-      />
-    </div>
-
-      <img
-        src={top}
-        alt=""
-        className="absolute top-0 right-0 w-[45%] pointer-events-none hidden md:block"
-      />
-
-      <img
-        src={ground}
-        alt=""
-        className="absolute bottom-0 left-0 w-[45%] pointer-events-none hidden md:block"
-      />
-
-      <div className="relative z-10 flex w-full max-w-6xl px-6 md:px-10 animate-[fadeIn_0.8s_ease]">
-        <div className="hidden md:flex flex-1 flex-col items-start justify-center">
-          <img src={DICT} alt="DICT Logo" className="max-w-[220px] mb-3" />
-
-          <div className="text-start leading-[0.85] mt-1">
-            <div
-              className="text-7xl font-extrabold tracking-tight"
-              style={{ color: "rgba(19, 73, 145, 1)" }}
-            >
-              INVENTORY
-            </div>
-            <div
-              className="text-7xl font-extrabold tracking-tight"
-              style={{ color: "rgba(229, 32, 37, 1)" }}
-            >
-              SYSTEM
-            </div>
-          </div>
-        </div>
-
-        <div className="flex-1 flex items-center justify-center"
-        style={{ fontFamily: "'Poppins', sans-serif" }}>
-          <Card className="w-full max-w-md rounded-2xl shadow-x1 backdrop-blur-[10px] bg-transparent border border-gray p-7">
-            <form
-              onSubmit={handleSubmit(onSubmit)}
-              className="flex flex-col gap-6 animate-[slideUp_0.6s_ease]"
-            >
-              <h2 className="text-3xl font-semibold text-center text-gray-900">
-                Welcome!
-              </h2>
-
-              {errors.root && (
-                <div className="p-3 text-sm bg-red-100 border border-red-300 text-red-700 rounded-md text-center">
-                  {errors.root.message}
-                </div>
-              )}
-
-              <FormField
-                label="User ID"
-                type="text"
-                placeholder="Enter your User ID"
-                variant="auth"
-                {...register("personnelId", {
-                  required: "User ID is required",
-                })}
-                error={errors.personnelId?.message}
-                onFocus={() => clearErrors("root")}
-              />
-
-              <FormField
-                label="Password"
-                type="password"
-                placeholder="Enter your password"
-                variant="auth"
-                {...register("password", {
-                  required: "Password is required",
-                })}
-                error={errors.password?.message}
-                onFocus={() => clearErrors("root")}
-              />
-
-             <div className="flex justify-center items-center mt-2">
-                <Button
-                  type="submit"
-                  label={isSubmitting || authLoading ? "Logging in..." : "Login"}
-                  variant="primary"
-                />
-              </div>
-
-            </form>
-          </Card>
-        </div>
+  <div
+    className={`h-screen w-full flex bg-white transition-opacity duration-700 ${
+      success ? "opacity-0" : "opacity-100"
+    }`}
+    style={{ fontFamily: "'Inter', sans-serif" }}
+  >
+    {/* LEFT SIDE */}
+    <div className="w-130 h-full flex flex-col  bg-gray-50  px-16 ">
+      
+      {/* LOGO AT VERY TOP */}
+      <div className="pt-10 ">
+        <img
+          src={DICT}
+          alt="DICT Logo"
+          className="h-25 object-contain"
+        />
       </div>
 
-      <style>
-        {`
-          @keyframes fadeIn {
-            from { opacity: 0 }
-            to { opacity: 1 }
-          }
+      {/* FORM CENTERED PERFECTLY */}
+      <div className="flex-1 flex items-center justify-center ">
+        <Card className=" mb-20">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex flex-col gap-6"
+          >
+            <div className="text-center space-y-1">
+              <h2 className="text-3xl font-bold text-gray-900">
+                Sign In
+              </h2>
+              <p className="text-sm text-gray-500">
+                Access the Inventory Management System
+              </p>
+            </div>
 
-          @keyframes slideUp {
-            from { opacity: 0; transform: translateX(20px) }
-            to { opacity: 1; transform: translateX(0) }
-          }
+            {errors.root && (
+              <div className="px-4 py-3 rounded-lg border border-red-300 bg-red-50 text-red-700 text-sm font-medium">
+                {errors.root.message}
+              </div>
+            )}
 
-          @keyframes fadeIn {
-            from { opacity: 0 }
-            to { opacity: 1 }
-          }
+            <Input
+              type="text"
+              placeholder="Enter your User ID"
+              {...register("personnelId", {
+                required: "User ID is required",
+              })}
+              onFocus={() => clearErrors("root")}
+              className="p-4"
+            />
 
-          @keyframes slideUp {
-            from { opacity: 0; transform: translateX(20px) }
-            to { opacity: 1; transform: translateX(0) }
-          }
+            <Input
+              type="password"
+              placeholder="Enter your password"
+              {...register("password", {
+                required: "Password is required",
+              })}
+              onFocus={() => clearErrors("root")}
+               className="p-4"
+            />
 
-          @keyframes slowSpin {
-            from {
-              transform: rotate(0deg);t
-            }
-            to {
-              transform: rotate(360deg);
-            }
-          }
-        `}
-      </style>
+            <Button
+              type="submit"
+              disabled={isSubmitting || authLoading}
+              className="w-full mt-2"
+            >
+              {isSubmitting || authLoading
+                ? "Authenticating..."
+                : "Sign In"}
+            </Button>
+          </form>
+        </Card>
+      </div>
     </div>
-  );
+
+    {/* RIGHT SIDE */}
+    <div className="w-full h-full relative items-center justify-center overflow-hidden flex flex-col">
+      <img src={top} alt=""  className=" -top-3.5 right-0  w-180 absolute"/>
+
+      <div className="w-3/4 space-y-4">
+  
+  <h1 className="text-4xl font-extrabold italic 
+                 bg-gradient-to-br from-red-600 to-blue-700 
+                 bg-clip-text text-transparent">
+    DICT - R7
+  </h1>
+
+  
+
+  <h2 className="text-7xl font-extrabold 
+                 bg-gradient-to-br from-red-600 to-blue-700 
+                 bg-clip-text text-transparent leading-tight italic">
+    INVENTORY AND ASSET MANAGEMENT
+                <hr className="border-0"/>
+     SYSTEM
+  </h2>
+
+</div>
+      
+      <div className="absolute w-40 h-25 flex gap-6 left-10 bottom-10">
+        <img src={pinasimage} alt="" />
+        <img src={BgImage} alt="" />
+      </div>
+    </div>
+  </div>
+);
 }
 
 export default LogInPage;

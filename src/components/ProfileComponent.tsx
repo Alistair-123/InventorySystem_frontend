@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/UseAuth";
 import { FiUser, FiShield, FiLogOut } from "react-icons/fi";
 import { resolveImageUrl } from "@/utils/image";
+import RoleGuard from "@/context/RoleGuard";
 type ProfileComponentProps = {
   collapsed: boolean;
   onExpandSidebar?: () => void;
@@ -166,7 +167,7 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({
             <FiUser size={16} className="text-gray-500" />
             Account
           </button>
-
+          <RoleGuard allowedRoles={['admin']}>
           <button
             onClick={() => openModalRoute("/admin")}
             className="w-full flex items-center gap-2 px-2 py-1 rounded-md transition-all duration-150 hover:bg-gray-100 active:scale-[0.97]"
@@ -174,6 +175,7 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({
             <FiShield size={16} className="text-gray-500" />
             Admin
           </button>
+          </RoleGuard>
         </div>
 
         <div className="border-t border-gray-200 my-1" />
