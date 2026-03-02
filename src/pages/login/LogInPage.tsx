@@ -137,17 +137,17 @@ function LogInPage() {
 />
         <div className="w-3/4 space-y-4 z-20">
 
-          <h1 className="text-4xl font-extrabold italic 
+          <h1 className="text-3xl font-extrabold italic 
                  bg-gradient-to-br from-red-600 to-blue-700 
                  bg-clip-text text-transparent">
-            DICT - R7
+            DICT - BOHOL PROVINCIAL OFFICE
           </h1>
 
 
 
           <h2 className="text-7xl font-extrabold 
                  bg-gradient-to-br from-red-600 to-blue-700 
-                 bg-clip-text text-transparent leading-tight italic">
+                 bg-clip-text text-transparent leading-tight italic ">
             INVENTORY AND ASSET MANAGEMENT
             <hr className="border-0" />
             SYSTEM

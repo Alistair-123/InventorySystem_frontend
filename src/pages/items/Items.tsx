@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import Dashboardheader from "@/components/Dashboardheader";
+import { Tag, FileText, Layers, Bookmark, Ruler, Upload, Image as ImageIcon } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -485,195 +486,219 @@ function Item() {
       </div>
 
       {/* Create / Edit Modal */}
-      <Modal
-        isOpen={isOpen}
-        onClose={handleCancelForm}
-        title={editingId ? "Edit Item" : "Create Item"}
-        className="max-w-none font-poppins h-[80%]"
-      >
-        <form onSubmit={handleSubmit(onSubmit)} className="p-4 space-y-6">
-          {/* ITEM IMAGE */}
-          <div className="flex gap-4">
-            <Label className="pr-17">Item Image</Label>
-            <Controller
-              name="itemImage"
-              control={control}
-              render={({ field }) => (
-                <label className="cursor-pointer">
-                  {preview ? (
-                    <img
-                      src={preview}
-                      className="w-30 h-30 rounded-full object-cover border"
-                    />
-                  ) : (
-                    <div className="w-30 h-30 rounded-full border flex items-center justify-center">
-                      Select Image
-                    </div>
-                  )}
+      {/* Create / Edit Modal */}
+<Modal
+  isOpen={isOpen}
+  onClose={handleCancelForm}
+  title={editingId ? "Edit Item" : "Create Item"}
+  className="w-1/2 font-poppins"
+>
+  <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5 p-5">
 
-                  <Input
-                    name="itemImage"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const files = e.target.files;
-                      if (!files) return;
-                      field.onChange(files);
-                      setPreview(URL.createObjectURL(files[0]));
-                    }}
-                  />
-                </label>
-              )}
-            />
-          </div>
-
-          <div className="flex gap-4">
-            {/* ITEM NAME */}
-            <div className="grid grid-cols-[150px_1fr] items-center gap-4">
-              <Label>Item Name</Label>
-              <Input
-                {...register("itemName", { required: "Item name is required" })}
-              />
-            </div>
-
-            {/* STATUS */}
-            <div className="flex items-center w-[40%] gap-4">
-              <Label>Status</Label>
-              <Controller
-                control={control}
-                name="status"
-                render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="active">
-                        <span className="h-2 w-2 rounded-full bg-green-500"></span>
-                        Active
-                      </SelectItem>
-                      <SelectItem value="inactive">
-                        <span className="h-2 w-2 rounded-full bg-red-500" />
-                        Inactive
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-            </div>
-          </div>
-
-          {/* DESCRIPTION */}
-          <div className="grid grid-cols-[150px_1fr] gap-4">
-            <Label className="pt-2">Item Description</Label>
-
-            <Controller
-              name="itemDescription"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <Textarea
-                  rows={4}
-                  value={field.value || ""}
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
+    {/* IMAGE + NAME + STATUS */}
+    <div className="flex items-start gap-4">
+      {/* Image Upload */}
+      <Controller
+        name="itemImage"
+        control={control}
+        render={({ field }) => (
+          <label className="group cursor-pointer shrink-0">
+            {preview ? (
+              <div className="relative h-20 w-20">
+                <img
+                  src={preview}
+                  className="h-20 w-20 rounded-xl object-cover border border-zinc-200"
                 />
+                <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/25 opacity-0 transition group-hover:opacity-100">
+                  <ImageIcon size={16} className="text-white" />
+                </div>
+              </div>
+            ) : (
+              <div className="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-zinc-300 bg-zinc-50 transition group-hover:border-zinc-400 group-hover:bg-zinc-100">
+                <Upload size={15} className="text-zinc-400" />
+                <span className="text-[10px] text-zinc-400">Photo</span>
+              </div>
+            )}
+            <Input
+              name="itemImage"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const files = e.target.files;
+                if (!files) return;
+                field.onChange(files);
+                setPreview(URL.createObjectURL(files[0]));
+              }}
+            />
+          </label>
+        )}
+      />
+
+      {/* Name + Status */}
+      <div className="flex flex-1 flex-col gap-3">
+        <div className="flex flex-col gap-1">
+          <label className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-zinc-400">
+            <Tag size={11} /> Item Name
+          </label>
+          <Input
+            placeholder="Enter item name"
+            {...register("itemName", { required: "Item name is required" })}
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">
+            Status
+          </label>
+          <Controller
+            control={control}
+            name="status"
+            render={({ field }) => (
+              <div className="flex gap-2">
+                {["active", "inactive"].map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => field.onChange(s)}
+                    className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
+                      field.value === s
+                        ? s === "active"
+                          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                          : "border-red-200 bg-red-50 text-red-500"
+                        : "border-zinc-200 bg-white text-zinc-400 hover:border-zinc-300"
+                    }`}
+                  >
+                    <span className={`h-1.5 w-1.5 rounded-full ${
+                      s === "active" ? "bg-emerald-500" : "bg-red-400"
+                    }`} />
+                    {s.charAt(0).toUpperCase() + s.slice(1)}
+                  </button>
+                ))}
+              </div>
+            )}
+          />
+        </div>
+      </div>
+    </div>
+
+    <div className="h-px bg-zinc-100" />
+
+    {/* DESCRIPTION */}
+    <div className="flex flex-col gap-1">
+      <label className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-zinc-400">
+        <FileText size={11} /> Description
+      </label>
+      <Controller
+        name="itemDescription"
+        control={control}
+        defaultValue=""
+        render={({ field }) => (
+          <Textarea
+            rows={3}
+            placeholder="Describe this item…"
+            value={field.value || ""}
+            onChange={field.onChange}
+            onBlur={field.onBlur}
+          />
+        )}
+      />
+    </div>
+
+    <div className="h-px bg-zinc-100" />
+
+    {/* ACCORDION */}
+    <Accordion type="single" collapsible>
+      <AccordionItem value="item-1" className="rounded-xl border border-zinc-100 overflow-hidden">
+        <AccordionTrigger className="flex items-center gap-2 px-4 py-3 text-sm font-medium text-zinc-700 hover:bg-zinc-50 hover:no-underline">
+          <Layers size={14} className="text-zinc-400" />
+          Additional Data
+        </AccordionTrigger>
+
+        <AccordionContent className="border-t border-zinc-100 bg-zinc-50/50 px-4 py-4 grid grid-cols-3 gap-4">
+
+          {/* CATEGORY */}
+          <div className="flex flex-col gap-1 w-full">
+            <label className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-zinc-400">
+              <Bookmark size={11} /> Category
+            </label>
+            <Controller
+              control={control}
+              name="category"
+              rules={{ required: true }}
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger className="w-full"><SelectValue placeholder="Select category" /></SelectTrigger>
+                  <SelectContent>
+                    {categories.map((c) => (
+                      <SelectItem key={c._id} value={c._id}>{c.categoryName}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               )}
             />
           </div>
 
-          <Accordion type="single" collapsible>
-            <AccordionItem value="item-1">
-              <AccordionTrigger className="border-b border-b-gray-100 p-4">
-                <span className="text-xl">Add Data</span>
-              </AccordionTrigger>
-
-              <AccordionContent className="p-4 space-y-4">
-                {/* CATEGORY */}
-                <div className="grid grid-cols-[150px_1fr] items-center gap-4">
-                  <Label>Category</Label>
-                  <Controller
-                    control={control}
-                    name="category"
-                    rules={{ required: true }}
-                    render={({ field }) => (
-                      <Select value={field.value} onValueChange={field.onChange}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {categories.map((c) => (
-                            <SelectItem key={c._id} value={c._id}>
-                              {c.categoryName}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
-                </div>
-
-                {/* BRAND */}
-                <div className="grid grid-cols-[150px_1fr] items-center gap-4">
-                  <Label>Brand</Label>
-                  <Controller
-                    control={control}
-                    name="brand"
-                    rules={{ required: true }}
-                    render={({ field }) => (
-                      <Select value={field.value} onValueChange={field.onChange}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select brand" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {brands.map((b) => (
-                            <SelectItem key={b._id} value={b._id}>
-                              {b.brandName}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
-                </div>
-
-                {/* UNIT */}
-                <div className="grid grid-cols-[150px_1fr] items-center gap-4">
-                  <Label>Unit</Label>
-                  <Controller
-                    control={control}
-                    name="unit"
-                    rules={{ required: true }}
-                    render={({ field }) => (
-                      <Select value={field.value} onValueChange={field.onChange}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select unit" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {units.map((u) => (
-                            <SelectItem key={u._1d} value={u._id}>
-                              {u.unitName}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-
-          {/* ACTIONS */}
-          <div className="flex justify-end gap-2 pt-6">
-            <Button type="button" variant="outline" onClick={handleCancelForm}>
-              Cancel
-            </Button>
-            <Button type="submit">{editingId ? "Save" : "Save"}</Button>
+          {/* BRAND */}
+          <div className="flex flex-col gap-1 w-full">
+            <label className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-zinc-400">
+              <Tag size={11} /> Brand
+            </label>
+            <Controller
+              control={control}
+              name="brand"
+              rules={{ required: true }}
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger className="w-full"><SelectValue placeholder="Select brand" /></SelectTrigger>
+                  <SelectContent>
+                    {brands.map((b) => (
+                      <SelectItem key={b._id} value={b._id}>{b.brandName}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </div>
-        </form>
-      </Modal>
+
+          {/* UNIT */}
+          <div className="flex flex-col gap-1 w-full">
+            <label className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-zinc-400">
+              <Ruler size={11} /> Unit
+            </label>
+            <Controller
+              control={control}
+              name="unit"
+              rules={{ required: true }}
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger className="w-full"><SelectValue placeholder="Select unit" /></SelectTrigger>
+                  <SelectContent>
+                    {units.map((u) => (
+                      <SelectItem key={u._id} value={u._id}>{u.unitName}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
+
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
+
+    {/* ACTIONS */}
+    <div className="flex justify-end gap-2 pt-1">
+      <Button type="button" variant="outline" onClick={handleCancelForm}>
+        Cancel
+      </Button>
+      <Button type="submit">
+        {editingId ? "Save Changes" : "Create Item"}
+      </Button>
+    </div>
+
+  </form>
+</Modal>
 
       {/* ConfirmAction for Delete / Edit */}
       <ConfirmAction

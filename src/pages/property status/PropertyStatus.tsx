@@ -31,13 +31,13 @@ const STATUS_CONFIG: Record<
   },
   unserviceable: {
     label: "Unserviceable",
-    color: "bg-black",
-    badgeClass: "bg-black text-white",
+    color: "bg-yellow-500",
+    badgeClass: "bg-yellow-500 text-white",
   },
   disposed: {
     label: "Disposed",
-    color: "bg-gray-400",
-    badgeClass: "bg-gray-400 text-white",
+    color: "bg-gray-500",
+    badgeClass: "bg-gray-500 text-white",
   },
   lost: {
     label: "Lost",

@@ -15,10 +15,10 @@ const StatusDot = ({ status }: { status: StatusType }): React.ReactNode => {
     status === "active" || status === "serviceable"
       ? "bg-green-500"
       : status === "inactive" || status === "unserviceable"
-      ? "bg-red-500"
+      ? "bg-yellow-500"
       : status === "disposed"
       ? "bg-gray-500"
-      : "bg-yellow-500"; // lost
+      : "bg-red-500"; // lost
 
   return (
     <span className="flex items-center gap-2">
