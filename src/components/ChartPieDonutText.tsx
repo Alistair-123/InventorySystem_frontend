@@ -28,12 +28,12 @@ interface Props {
 export function ChartPieDonutText({ statusBreakdown }: Props) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
 
-  const rawData = [
-    { name: "Serviceable", value: statusBreakdown.serviceable, color: "#22c55e" },
-    { name: "Unserviceable", value: statusBreakdown.unserviceable, color: "#000000" },
-    { name: "Disposed", value: statusBreakdown.disposed, color: "#6b7280" },
-    { name: "Lost", value: statusBreakdown.lost, color: "#ef4444" },
-  ]
+const rawData = [
+  { name: "Serviceable", value: statusBreakdown.serviceable, color: "#22c55e" }, // green-500
+  { name: "Unserviceable", value: statusBreakdown.unserviceable, color: "#eab308" }, // yellow-500
+  { name: "Disposed", value: statusBreakdown.disposed, color: "#6b7280" }, // gray-500
+  { name: "Lost", value: statusBreakdown.lost, color: "#ef4444" }, // red-500
+];
 
   const chartData = rawData.filter((item) => item.value > 0)
 

@@ -42,15 +42,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, []);
 
   const login = async (data: LoginPayload) => {
-    setLoading(true);
-    try {
-      const res = await authService.login(data);
-      setUser(res.personnel);
-      navigate('/', { replace: true });
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+  try {
+    const res = await authService.login(data);
+    setUser(res.personnel);
+    navigate('/', { replace: true }); // 👈 navigates AWAY on success
+  } catch (error) {
+    throw error;
+  } finally {
+    setLoading(false);
+  }
+};
 
   const logout = async () => {
     try {

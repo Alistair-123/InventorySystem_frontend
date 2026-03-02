@@ -33,26 +33,26 @@ import { Loader2, Search, X } from "lucide-react";
 ============================ */
 const STATUS_CONFIG: Record<
   string,
-  { label: string; dot: string; badgeClass: string }
+  { label: string; color: string; badgeClass: string }
 > = {
   serviceable: {
     label: "Serviceable",
-    dot: "bg-green-500",
+    color: "bg-green-500",
     badgeClass: "bg-green-500 text-white",
   },
   unserviceable: {
     label: "Unserviceable",
-    dot: "bg-black",
-    badgeClass: "bg-black text-white",
+    color: "bg-yellow-500",
+    badgeClass: "bg-yellow-500 text-white",
   },
   disposed: {
     label: "Disposed",
-    dot: "bg-gray-400",
-    badgeClass: "bg-gray-400 text-white",
+    color: "bg-gray-500",
+    badgeClass: "bg-gray-500 text-white",
   },
   lost: {
     label: "Lost",
-    dot: "bg-red-500",
+    color: "bg-red-500",
     badgeClass: "bg-red-500 text-white",
   },
 };
@@ -211,14 +211,14 @@ function PropertiesPerCategory() {
 
                 <TableHead>
                   <div className="flex items-center gap-2">
-                    <span className="bg-black w-3 h-3 rounded-full" />
+                    <span className="bg-yellow-500 w-3 h-3 rounded-full" />
                     Unserviceable
                   </div>
                 </TableHead>
 
                 <TableHead>
                   <div className="flex items-center gap-2">
-                    <span className="bg-gray-400 w-3 h-3 rounded-full" />
+                    <span className="bg-gray-500 w-3 h-3 rounded-full" />
                     Disposed
                   </div>
                 </TableHead>
@@ -256,13 +256,13 @@ function PropertiesPerCategory() {
                   </TableCell>
 
                   <TableCell>
-                    <Badge className="bg-black text-white hover:bg-black/80">
+                   <Badge className="bg-yellow-500 text-white hover:bg-yellow-600">
                       {cat.unserviceable}
                     </Badge>
                   </TableCell>
 
                   <TableCell>
-                    <Badge className="bg-gray-400 text-white hover:bg-gray-500">
+                    <Badge className="bg-gray-500 text-white hover:bg-gray-600">
                       {cat.disposed}
                     </Badge>
                   </TableCell>
@@ -331,7 +331,7 @@ function PropertiesPerCategory() {
                   key={s.label}
                   className="flex items-center gap-2 text-sm text-muted-foreground"
                 >
-                  <span className={`w-2.5 h-2.5 rounded-full ${s.dot}`} />
+                  <span className={`w-2.5 h-2.5 rounded-full ${s.color}`} />
                   {s.label}
                 </div>
               ))}
@@ -408,7 +408,7 @@ function PropertiesPerCategory() {
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center gap-2">
-                                <span className={`w-2.5 h-2.5 rounded-full ${config.dot}`} />
+                                <span className={`w-2.5 h-2.5 rounded-full ${config.color}`} />
                                 <Badge className={config.badgeClass}>
                                   {config.label}
                                 </Badge>
