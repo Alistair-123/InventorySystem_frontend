@@ -16,6 +16,7 @@ import { Loader2, Search } from "lucide-react";
 
 import { fetchProperties } from "./Api";
 import type { Property } from "./types";
+import { Button } from "@/components/ui/button";
 
 /* ============================
     STATUS CONFIG
@@ -53,32 +54,34 @@ function PropertyStatusPage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-
+  const [page, setPage] = useState(1);
+const [totalPages, setTotalPages] = useState(1);
   /* ============================
       FETCH DATA
   ============================ */
   const loadProperties = async () => {
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const res = await fetchProperties({
-        page: 1,
-        limit: 1000,
-        search,
-      });
+    const res = await fetchProperties({
+      page,
+      limit: 10,
+      search,
+    });
 
-      setProperties(res.properties);
-    } catch (error) {
-      console.error("Failed to load property status:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    setProperties(res.properties);
+    setTotalPages(res.totalPages);
+
+  } catch (error) {
+    console.error("Failed to load property status:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
-    loadProperties();
-  }, [search]);
-
+  loadProperties();
+}, [search, page]);
   return (
     <div className="p-6 space-y-6 font-poppins">
 
@@ -138,6 +141,7 @@ function PropertyStatusPage() {
               <TableRow>
                 <TableHead className="w-12">#</TableHead>
                 <TableHead>Property No.</TableHead>
+                <TableHead>Item Name</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
@@ -157,12 +161,16 @@ function PropertyStatusPage() {
                   >
                     {/* NUMBER */}
                     <TableCell className="text-muted-foreground">
-                      {index + 1}
+                      {(page - 1) * 10 + index + 1}
                     </TableCell>
 
                     {/* PROPERTY NO */}
                     <TableCell className="font-medium">
                       {p.propertyNo}
+                    </TableCell>
+
+                     <TableCell className="font-medium">
+                      {p.item?.itemName}
                     </TableCell>
 
                     {/* STATUS */}
@@ -191,6 +199,30 @@ function PropertyStatusPage() {
               )}
             </TableBody>
           </Table>
+
+          <div className="flex justify-end items-center mt-4 gap-2">
+
+  <Button
+    disabled={page === 1}
+    onClick={() => setPage((p) => p - 1)}
+    className="px-3 py-1 border rounded-md disabled:opacity-40"
+  >
+    Previous
+  </Button>
+
+  <span className="text-sm text-muted-foreground">
+    Page {page} of {totalPages}
+  </span>
+
+  <Button
+    disabled={page === totalPages}
+    onClick={() => setPage((p) => p + 1)}
+    className="px-3 py-1 border rounded-md disabled:opacity-40"
+  >
+    Next
+  </Button>
+
+</div>
         </div>
       )}
     </div>

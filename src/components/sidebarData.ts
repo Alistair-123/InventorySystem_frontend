@@ -48,10 +48,4 @@ export const sidebarData: Record<string, SidebarSection> = {
       propertiesperpersonnel: { label: "Properties per Personnel",url: "/reports/properties-per-personnel",   icon: FaUsers     },
     },
   },
-  adjustments: {
-    label: "Adjustments",
-    items: {
-      adjustmentReports: { label: "Adjustment Reports", url: "/adjustment-reports" },
-    },
-  },
 };

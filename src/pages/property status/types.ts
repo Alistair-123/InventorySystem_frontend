@@ -8,7 +8,7 @@ export type PropertyStatus =
 // Item Reference
 export interface Item {
   _id: string;
-  name: string;
+  itemName: string;
 }
 
 // Office Reference

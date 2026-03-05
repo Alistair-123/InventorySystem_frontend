@@ -107,15 +107,8 @@ const [pendingEdit, setPendingEdit] = useState<Property | null>(null);
   office: pendingEdit.office?._id ?? "",
   status: pendingEdit.status,
 });
-
-
   setPendingEdit(null);
 }, [options, pendingEdit, reset]);
-
-
-
-
-
 
 const watchedItem = watch("item");
 const watchedAcquisitionType = watch("acquisitionType");
@@ -477,7 +470,7 @@ const confirmDelete = async () => {
           <label className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-400">
             <CalendarDays size={11} /> Date
           </label>
-          <Input type="date" {...register("acquisitionDate", { required: true })} />
+          <Input max={new Date().toISOString().split("T")[0]} type="date" {...register("acquisitionDate", { required: true })} />
         </div>
 
         {/* Acquisition Value */}
