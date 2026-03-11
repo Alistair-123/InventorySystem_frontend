@@ -1,7 +1,5 @@
-"use client"
-
 import React, { useEffect, useState, useCallback } from "react"
-import { fetchProperties } from "./fetchdata"
+import { fetchProperties, downloadPropertiesCSV, downloadPropertiesPDF } from "./fetchdata"
 import type { PropertyDepreciation } from "./types"
 
 import {
@@ -51,6 +49,13 @@ import {
   RefreshCw,
   Download,
 } from "lucide-react"
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("en-PH", {
@@ -213,10 +218,24 @@ export default function InventorySummary() {
               <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${loading ? "animate-spin" : ""}`} />
               Refresh
             </Button>
-            <Button variant="outline" size="sm">
-              <Download className="h-3.5 w-3.5 mr-1.5" />
-              Export
-            </Button>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Download className="h-3.5 w-3.5 mr-1.5" />
+                    Export
+                  </Button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => downloadPropertiesPDF(search)} >
+                    Export as PDF
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem  onClick={() => downloadPropertiesCSV(search)}>
+                    Export as CSV
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
           </div>
         </div>
 
@@ -352,7 +371,7 @@ export default function InventorySummary() {
                             <p className="text-sm font-medium tabular-nums">
                               {formatCurrency(row.currentValue)}
                             </p>
-                            <p className="text-xs text-muted-foreground tabular-nums text-right">
+                            <p className="text-xs text-muted-foreground tabular-nums text-right text-red-400">
                               −{formatCurrency(row.depreciated)}
                             </p>
                           </div>
